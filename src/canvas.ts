@@ -4,9 +4,9 @@ import {
   Intersection,
   Raycaster,
   Object3D,
+  Vector2,
   Scene,
   Event,
-  Vec2,
 } from "three";
 
 export default class Canvas {
@@ -17,12 +17,12 @@ export default class Canvas {
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
   private raycaster: Raycaster;
-  private _pointerPosition: Vec2 = { x: 0, y: 0 };
-  private _intersectedObjects: Intersection<Object3D<Event>>[];
   private animationFrameCallbacks: Map<
     FrameObserverType,
     { interval: number; lastCalled: number }
-  > = new Map();
+  >;
+  private _pointerPosition: Vector2;
+  private _intersectedObjects: Intersection<Object3D<Event>>[];
 
   constructor(canvasElement: string | HTMLCanvasElement) {
     let _canvas;
@@ -58,6 +58,9 @@ export default class Canvas {
       this.renderer.setSize(this.width, this.height);
 
       this.raycaster = new Raycaster();
+      this._pointerPosition = new Vector2();
+
+      this.animationFrameCallbacks = new Map();
 
       addEventListener("resize", () => this.resize());
       addEventListener("pointermove", ({ clientX, clientY }) =>

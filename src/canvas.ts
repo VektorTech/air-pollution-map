@@ -1,18 +1,28 @@
-import * as THREE from "three";
+import {
+  PerspectiveCamera,
+  WebGLRenderer,
+  Intersection,
+  Raycaster,
+  Object3D,
+  Scene,
+  Event,
+  Vec2,
+} from "three";
 
 export default class Canvas {
   private canvas: HTMLCanvasElement;
   private width: number;
   private height: number;
-  private scene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
-  private renderer: THREE.WebGLRenderer;
-  private raycaster: THREE.Raycaster;
-  private _pointerPosition: THREE.Vec2 = { x: 0, y: 0 };
-  private _intersectedObjects: THREE.Intersection<
-    THREE.Object3D<THREE.Event>
-  >[];
-  private animationFrameCallbacks: Set<FrameObserverType> = new Set();
+  private scene: Scene;
+  private camera: PerspectiveCamera;
+  private renderer: WebGLRenderer;
+  private raycaster: Raycaster;
+  private _pointerPosition: Vec2 = { x: 0, y: 0 };
+  private _intersectedObjects: Intersection<Object3D<Event>>[];
+  private animationFrameCallbacks: Map<
+    FrameObserverType,
+    { interval: number; lastCalled: number }
+  > = new Map();
 
   constructor(canvasElement: string | HTMLCanvasElement) {
     let _canvas;
@@ -30,8 +40,8 @@ export default class Canvas {
       this.width = this.canvas.offsetWidth;
       this.height = this.canvas.offsetHeight;
 
-      this.scene = new THREE.Scene();
-      this.camera = new THREE.PerspectiveCamera(
+      this.scene = new Scene();
+      this.camera = new PerspectiveCamera(
         75,
         this.width / this.height,
         0.1,
@@ -39,7 +49,7 @@ export default class Canvas {
       );
       this.camera.position.z = 1;
 
-      this.renderer = new THREE.WebGLRenderer({
+      this.renderer = new WebGLRenderer({
         antialias: true,
         alpha: true,
         canvas: this.canvas,
@@ -47,7 +57,7 @@ export default class Canvas {
       this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
       this.renderer.setSize(this.width, this.height);
 
-      this.raycaster = new THREE.Raycaster();
+      this.raycaster = new Raycaster();
 
       addEventListener("resize", () => this.resize());
       addEventListener("pointermove", ({ clientX, clientY }) =>
@@ -80,7 +90,13 @@ export default class Canvas {
 
   private render(time: number) {
     this.renderer.render(this.scene, this.camera);
-    // this.animationFrameCallbacks.forEach((callback) => callback(time));
+
+    this.animationFrameCallbacks.forEach((timeInfo, callback) => {
+      if (time - timeInfo.lastCalled >= timeInfo.interval) {
+        callback(time);
+        timeInfo.lastCalled = time;
+      }
+    });
   }
 
   private onPointerMove(clientX: number, clientY: number) {
@@ -94,8 +110,8 @@ export default class Canvas {
     );
   }
 
-  public addAnimationFrameObserver(callback: FrameObserverType, interval: number) {
-    this.animationFrameCallbacks.add(callback);
+  public addAnimationFrameObserver(callback: FrameObserverType, interval = 0) {
+    this.animationFrameCallbacks.set(callback, { interval, lastCalled: 0 });
   }
 
   public removeAnimationFrameObserver(callback: FrameObserverType) {

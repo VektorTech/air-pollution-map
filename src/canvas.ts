@@ -7,6 +7,7 @@ import {
   Vector2,
   Scene,
   Event,
+  Clock,
 } from "three";
 
 export default class Canvas {
@@ -17,11 +18,14 @@ export default class Canvas {
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
   private raycaster: Raycaster;
+  private clock: Clock;
   private animationFrameCallbacks: Map<
     FrameObserverType,
     { interval: number; lastCalled: number }
   >;
+  private moveInteractionCallbacks: Set<MoveInteractionObserverType>;
   private _pointerPosition: Vector2;
+  private _pointerMovement: Vector2;
   private _intersectedObjects: Intersection<Object3D<Event>>[];
 
   constructor(canvasElement: string | HTMLCanvasElement) {
@@ -37,8 +41,8 @@ export default class Canvas {
       _canvas instanceof HTMLCanvasElement
     ) {
       this.canvas = _canvas;
-      this.width = this.canvas.offsetWidth;
-      this.height = this.canvas.offsetHeight;
+      this.width = window.innerWidth;
+      this.height = window.innerHeight;
 
       this.scene = new Scene();
       this.camera = new PerspectiveCamera(
@@ -47,7 +51,7 @@ export default class Canvas {
         0.1,
         1000
       );
-      this.camera.position.z = 1;
+      this.camera.position.z = 3;
 
       this.renderer = new WebGLRenderer({
         antialias: true,
@@ -58,13 +62,19 @@ export default class Canvas {
       this.renderer.setSize(this.width, this.height);
 
       this.raycaster = new Raycaster();
+      this.clock = new Clock();
       this._pointerPosition = new Vector2();
+      this._pointerMovement = new Vector2();
 
       this.animationFrameCallbacks = new Map();
+      this.moveInteractionCallbacks = new Set();
 
       addEventListener("resize", () => this.resize());
       addEventListener("pointermove", ({ clientX, clientY }) =>
         this.onPointerMove(clientX, clientY)
+      );
+      addEventListener("touchmove", ({ touches }) =>
+        this.onPointerMove(touches[0].clientX, touches[0].clientY)
       );
       this.renderer.setAnimationLoop((time) => this.render(time));
     } else {
@@ -76,13 +86,21 @@ export default class Canvas {
     return this._pointerPosition;
   }
 
+  get cursorMovement() {
+    return this._pointerMovement;
+  }
+
   get hoveredObjects() {
     return this._intersectedObjects;
   }
 
+  get canvasScene() {
+    return this.scene;
+  }
+
   private resize() {
-    this.width = this.canvas.offsetWidth;
-    this.height = this.canvas.offsetHeight;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
 
     this.camera.aspect = this.width / this.height;
     this.camera.updateProjectionMatrix();
@@ -96,15 +114,25 @@ export default class Canvas {
 
     this.animationFrameCallbacks.forEach((timeInfo, callback) => {
       if (time - timeInfo.lastCalled >= timeInfo.interval) {
-        callback(time);
+        callback(time, this.clock.getDelta());
         timeInfo.lastCalled = time;
       }
     });
   }
 
   private onPointerMove(clientX: number, clientY: number) {
-    this._pointerPosition.x = (clientX / this.width) * 2 - 1;
-    this._pointerPosition.y = -(clientY / this.height) * 2 + 1;
+    const _pointerPositionX = (clientX / this.width) * 2 - 1;
+    const _pointerPositionY = -(clientY / this.height) * 2 + 1;
+
+    this._pointerMovement.x = _pointerPositionX - this._pointerPosition.x;
+    this._pointerMovement.y = _pointerPositionY - this._pointerPosition.y;
+
+    this._pointerPosition.x = _pointerPositionX;
+    this._pointerPosition.y = _pointerPositionY;
+
+    this.moveInteractionCallbacks.forEach((callback) =>
+      callback(this._pointerPosition, this._pointerMovement)
+    );
 
     this.raycaster.setFromCamera(this._pointerPosition, this.camera);
 
@@ -120,8 +148,20 @@ export default class Canvas {
   public removeAnimationFrameObserver(callback: FrameObserverType) {
     this.animationFrameCallbacks.delete(callback);
   }
+
+  public addMoveInteractionObserver(callback: MoveInteractionObserverType) {
+    this.moveInteractionCallbacks.add(callback);
+  }
+
+  public removeMoveInteractionObserver(callback: MoveInteractionObserverType) {
+    this.moveInteractionCallbacks.delete(callback);
+  }
 }
 
 interface FrameObserverType {
-  (time: number): void;
+  (time: number, delta: number): void;
+}
+
+interface MoveInteractionObserverType {
+  (cursor: Vector2, cursorMovement: Vector2): void;
 }

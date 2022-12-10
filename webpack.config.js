@@ -9,7 +9,18 @@ module.exports = {
     path: path.resolve(__dirname, "public"),
   },
   module: {
-    rules: [{ test: /\.ts$/, use: "ts-loader", exclude: /node_modules/ }]
+    rules: [
+      {
+        test: /\.ts$/,
+        use: "ts-loader",
+        exclude: /node_modules/
+      },
+      {
+        test: /\.glsl$/i,
+        exclude: /node_modules/,
+        use: ["raw-loader", "glslify-loader"]
+      }
+    ]
   },
   resolve: {
     extensions: [".ts", ".js"],

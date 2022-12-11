@@ -49,7 +49,7 @@ export default class Canvas {
         75,
         this.width / this.height,
         0.1,
-        1000
+        10
       );
       this.camera.position.z = 3;
 

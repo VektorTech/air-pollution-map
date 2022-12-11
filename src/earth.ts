@@ -41,7 +41,7 @@ export default class Earth {
     const geometry = new SphereGeometry(1, 50, 50);
     const cloudsGeometry = new SphereGeometry(1.01, 50, 50);
 
-    const lightPos = new Vector3(-1.8, 1.5, -0.1);
+    const lightPos = new Vector3(-1.9, 1.5, -0.1);
     const material = new ShaderMaterial({
       vertexShader: standardVertexShader,
       fragmentShader: lightTextureShader,

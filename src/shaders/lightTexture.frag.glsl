@@ -18,7 +18,7 @@ void main() {
 	float attenuation = pow(length(lightDirection) * 0.4, 5.0);
 	float intensity = min(_angle * attenuation, 0.8);
 
-	vec3 finalColor = max(mapCol.rgb * pow(angle, 3.0) * 0.8, 0.04) + (lightCol.rgb * intensity);
+	vec3 finalColor = max(mapCol.rgb * pow(angle, 3.0) * 0.6, 0.04) + (lightCol.rgb * intensity);
 
 	gl_FragColor = vec4(finalColor, 1.0);
 }

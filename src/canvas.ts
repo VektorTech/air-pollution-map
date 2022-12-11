@@ -46,7 +46,7 @@ export default class Canvas {
 
       this.scene = new Scene();
       this.camera = new PerspectiveCamera(
-        75,
+        window.innerWidth < 420 ? 85 : 70,
         this.width / this.height,
         0.1,
         10
@@ -107,6 +107,7 @@ export default class Canvas {
     this.height = window.innerHeight;
 
     this.camera.aspect = this.width / this.height;
+    this.camera.fov = window.innerWidth < 420 ? 85 : 70;
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(this.width, this.height);

@@ -1,16 +1,16 @@
-uniform sampler2D lightTexture;
-uniform sampler2D map;
+uniform sampler2D iLightMap;
+uniform sampler2D iEarthAlbedo;
 uniform vec3 iResolution;
-uniform vec3 lightPos;
+uniform vec3 iLightPos;
 
 varying vec2 vUv;
 varying vec3 vNormal;
 
 void main() {
-	vec4 mapCol = texture2D(map, vUv);
-	vec4 lightCol = texture2D(lightTexture, vUv);
+	vec4 mapCol = texture2D(iEarthAlbedo, vUv);
+	vec4 lightCol = texture2D(iLightMap, vUv);
 
-	vec3 lightDirection = vec3(lightPos.xy - (gl_FragCoord.xy / iResolution.xy), lightPos.z);
+	vec3 lightDirection = vec3(iLightPos.xy - (gl_FragCoord.xy / iResolution.xy), iLightPos.z);
 	lightDirection.x *= iResolution.x / iResolution.y;
 
 	float angle = max(dot(lightDirection, vNormal), 0.0);

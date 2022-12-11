@@ -37,31 +37,31 @@ export default class Earth {
       );
 
     const geometry = new SphereGeometry(1, 20, 20);
+	const cloudsGeometry = new SphereGeometry(1.02, 20, 20);
 
     const lightPos = new Vector3(-0.1, 1.1, 0.6);
-
-    let material = new ShaderMaterial({
+    const material = new ShaderMaterial({
       vertexShader: standardVertexShader,
       fragmentShader: lightTextureShader,
       uniforms: {
-        map: { value: earthTexture },
-        lightTexture: { value: lightTexture },
-        lightPos: { value: lightPos },
+        iEarthAlbedo: { value: earthTexture },
+        iLightMap: { value: lightTexture },
+        iLightPos: { value: lightPos },
         iResolution: { value: new Vector3(innerWidth, innerHeight, 1) },
       },
-    });
-    this.earth = new Mesh(geometry, material);
-    const cloudsGeometry = new SphereGeometry(1.02, 20, 20);
+    })
     const cloudsMaterial = new ShaderMaterial({
       vertexShader: standardVertexShader,
       fragmentShader: cloudsTextureShader,
       uniforms: {
-        alphaMap: { value: cloudsTexture },
-        lightPos: { value: lightPos },
+        iCloudsAlphaMap: { value: cloudsTexture },
+        iLightPos: { value: lightPos },
         iResolution: { value: new Vector3(innerWidth, innerHeight, 1) },
       },
       transparent: true,
     });
+
+	this.earth = new Mesh(geometry, material);
     this.clouds = new Mesh(cloudsGeometry, cloudsMaterial);
     this.earth.add(this.clouds);
 

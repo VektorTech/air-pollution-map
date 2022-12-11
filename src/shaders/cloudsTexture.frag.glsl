@@ -1,14 +1,14 @@
-uniform sampler2D alphaMap;
+uniform sampler2D iCloudsAlphaMap;
 uniform vec3 iResolution;
-uniform vec3 lightPos;
+uniform vec3 iLightPos;
 
 varying vec2 vUv;
 varying vec3 vNormal;
 
 void main() {
-	vec4 textureCol = texture2D(alphaMap, vUv);
+	vec4 textureCol = texture2D(iCloudsAlphaMap, vUv);
 
-	vec3 lightDirection = vec3(lightPos.xy - (gl_FragCoord.xy / iResolution.xy), lightPos.z);
+	vec3 lightDirection = vec3(iLightPos.xy - (gl_FragCoord.xy / iResolution.xy), iLightPos.z);
 	lightDirection.x *= iResolution.x / iResolution.y;
 
 	float angle = max(dot(lightDirection, vNormal), 0.0);

@@ -1,5 +1,3 @@
-uniform vec3 lightPos;
-
 varying vec2 vUv;
 varying vec3 vNormal;
 

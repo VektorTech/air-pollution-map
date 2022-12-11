@@ -9,7 +9,9 @@ import {
   Mesh,
   Vector3,
 } from "three";
+
 import Utils from "./utils";
+
 import standardVertexShader from "./shaders/standard.vert.glsl";
 import lightTextureShader from "./shaders/lightTexture.frag.glsl";
 import cloudsTextureShader from "./shaders/cloudsTexture.frag.glsl";
@@ -36,10 +38,10 @@ export default class Earth {
         "./assets/textures/cloudsDiffuse.jpg"
       );
 
-    const geometry = new SphereGeometry(1, 20, 20);
-	const cloudsGeometry = new SphereGeometry(1.02, 20, 20);
+    const geometry = new SphereGeometry(1, 50, 50);
+    const cloudsGeometry = new SphereGeometry(1.01, 50, 50);
 
-    const lightPos = new Vector3(-0.1, 1.1, 0.6);
+    const lightPos = new Vector3(-1.8, 1.5, -0.1);
     const material = new ShaderMaterial({
       vertexShader: standardVertexShader,
       fragmentShader: lightTextureShader,
@@ -47,21 +49,19 @@ export default class Earth {
         iEarthAlbedo: { value: earthTexture },
         iLightMap: { value: lightTexture },
         iLightPos: { value: lightPos },
-        iResolution: { value: new Vector3(innerWidth, innerHeight, 1) },
       },
-    })
+    });
     const cloudsMaterial = new ShaderMaterial({
       vertexShader: standardVertexShader,
       fragmentShader: cloudsTextureShader,
       uniforms: {
         iCloudsAlphaMap: { value: cloudsTexture },
         iLightPos: { value: lightPos },
-        iResolution: { value: new Vector3(innerWidth, innerHeight, 1) },
       },
       transparent: true,
     });
 
-	this.earth = new Mesh(geometry, material);
+    this.earth = new Mesh(geometry, material);
     this.clouds = new Mesh(cloudsGeometry, cloudsMaterial);
     this.earth.add(this.clouds);
 
@@ -72,7 +72,9 @@ export default class Earth {
     scene.add(this.earth);
 
     addEventListener("pointerdown", () => (this.isPointerDown = true));
+    addEventListener("touchstart", () => (this.isPointerDown = true));
     addEventListener("pointerup", () => (this.isPointerDown = false));
+    addEventListener("touchend", () => (this.isPointerDown = false));
   }
 
   update(delta: number) {
@@ -99,23 +101,7 @@ export default class Earth {
     this.rotationVelocity.y += this.rotationAcceleration.y;
     this.earth.rotation.y = this.rotationVelocity.y;
 
-    this.clouds.rotation.y += Math.PI * delta * 1e-2;
-
-    if (
-      this.earth.material instanceof ShaderMaterial &&
-      this.clouds.material instanceof ShaderMaterial
-    ) {
-      this.earth.material.uniforms.iResolution.value.set(
-        innerWidth,
-        innerHeight,
-        1
-      );
-      this.clouds.material.uniforms.iResolution.value.set(
-        innerWidth,
-        innerHeight,
-        1
-      );
-    }
+    this.clouds.rotation.y += Math.PI * delta * 3e-2;
   }
 
   onMoveInteraction(position: Vector2, movement: Vector2) {

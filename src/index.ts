@@ -7,6 +7,7 @@ window.addEventListener("load", () => {
 
   canvas.addAnimationFrameObserver((time, delta) => {
     earth.update(delta);
+    earth.checkActiveObjects(canvas.hoveredObjects);
   });
 
   canvas.addMoveInteractionObserver(() => {

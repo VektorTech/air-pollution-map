@@ -1,13 +1,17 @@
 import gsap from "gsap";
 
 import {
+  MeshBasicMaterial,
   ShaderMaterial,
   SphereGeometry,
   TextureLoader,
   Vector2,
+  Vector3,
   Scene,
   Mesh,
-  Vector3,
+  Intersection,
+  Object3D,
+  Event,
 } from "three";
 
 import Utils from "./utils";
@@ -20,12 +24,15 @@ export default class Earth {
   private earth: Mesh;
   private clouds: Mesh;
   private isPointerDown: boolean;
+  private clicked = false;
 
   private rotationVelocity: Vector2;
   private rotationAcceleration: Vector2;
 
   private readonly DAMP_ROT_FACTOR_X = 0.99;
   private readonly DAMP_ROT_FACTOR_Y = 0.88;
+
+  public readonly name = "Earth";
 
   constructor(scene: Scene) {
     const earthTexture = new TextureLoader().load(
@@ -62,7 +69,9 @@ export default class Earth {
     });
 
     this.earth = new Mesh(geometry, material);
+    this.earth.name = this.name;
     this.clouds = new Mesh(cloudsGeometry, cloudsMaterial);
+    this.clouds.raycast = () => undefined;
     this.earth.add(this.clouds);
 
     this.rotationAcceleration = new Vector2();
@@ -75,6 +84,37 @@ export default class Earth {
     addEventListener("touchstart", () => (this.isPointerDown = true));
     addEventListener("pointerup", () => (this.isPointerDown = false));
     addEventListener("touchend", () => (this.isPointerDown = false));
+    addEventListener("click", () => (this.clicked = true));
+  }
+
+  pinMarker(
+    latitude: number,
+    longitude: number,
+    details?: Record<string, unknown>
+  ) {
+    const material = new MeshBasicMaterial({
+      color: 0xfefebe,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const sphere = new Mesh(new SphereGeometry(2e-2, 8, 8), material);
+    const latitudeRad = Utils.degreesToRadians(latitude);
+    const longitudeRad = Utils.degreesToRadians(longitude);
+
+    const { x, y, z } = Utils.sphericalToCartesian(
+      latitudeRad,
+      -longitudeRad,
+      this.earth.scale.x
+    );
+    sphere.userData = {
+      latitudeRad,
+      longitudeRad,
+      position: { x, y, z },
+      details,
+    };
+    sphere.position.set(x, y, z);
+    sphere.name = "Marker";
+    this.earth.add(sphere);
   }
 
   update(delta: number) {
@@ -102,6 +142,25 @@ export default class Earth {
     this.earth.rotation.y = this.rotationVelocity.y;
 
     this.clouds.rotation.y += Math.PI * delta * 3e-2;
+  }
+
+  checkActiveObjects(intersections: Intersection<Object3D<Event>>[]) {
+    if (this.clicked) {
+      const earthIntersection = intersections.find(
+        (current) => current.object.name == this.name
+      );
+
+      if (earthIntersection) {
+        const { phi, theta } = Utils.cartesianToDegrees(
+          earthIntersection.face.normal
+        );
+        const lat = Utils.radiansToDegrees(phi);
+        const long = -Utils.radiansToDegrees(theta);
+        console.log(lat, long);
+      }
+
+      this.clicked = false;
+    }
   }
 
   onMoveInteraction(position: Vector2, movement: Vector2) {

@@ -22,7 +22,8 @@ export default class Earth {
   private rotationVelocity: Vector2;
   private rotationAcceleration: Vector2;
 
-  private readonly DAMP_FACTOR = 0.88;
+  private readonly DAMP_ROT_FACTOR_X = 0.99;
+  private readonly DAMP_ROT_FACTOR_Y = 0.88;
 
   constructor(scene: Scene) {
     const earthTexture = new TextureLoader().load(
@@ -78,14 +79,10 @@ export default class Earth {
     delta = Math.min(delta, 0.033334);
 
     if (this.isPointerDown) {
-      this.rotationAcceleration.x *= this.DAMP_FACTOR;
-      this.rotationAcceleration.y *= this.DAMP_FACTOR;
+      this.rotationAcceleration.y *= this.DAMP_ROT_FACTOR_Y;
     } else {
-      this.rotationAcceleration.x = gsap.utils.interpolate(
-        this.rotationAcceleration.x,
-        -this.earth.rotation.x * delta,
-        0.1
-      );
+      this.rotationAcceleration.x *= this.DAMP_ROT_FACTOR_X;
+
       this.rotationAcceleration.y = gsap.utils.interpolate(
         this.rotationAcceleration.y,
         Utils.degreesToRadians(5) * delta,
@@ -93,11 +90,15 @@ export default class Earth {
       );
     }
 
-    this.rotationVelocity.x += this.rotationAcceleration.x;
-    this.rotationVelocity.y += this.rotationAcceleration.y;
+    this.earth.rotation.x = gsap.utils.interpolate(
+      this.earth.rotation.x,
+      this.rotationAcceleration.x,
+      0.1
+    );
 
-    this.earth.rotation.x = this.rotationVelocity.x;
+    this.rotationVelocity.y += this.rotationAcceleration.y;
     this.earth.rotation.y = this.rotationVelocity.y;
+
     this.clouds.rotation.y += Math.PI * delta * 1e-2;
 
     if (
@@ -118,8 +119,14 @@ export default class Earth {
   }
 
   onMoveInteraction(position: Vector2, movement: Vector2) {
-    this.rotationAcceleration.x +=
-      (-movement.y / 20) * Number(this.isPointerDown);
+    const limit = Utils.degreesToRadians(60);
+    this.rotationAcceleration.x += -movement.y * Number(this.isPointerDown);
+    this.rotationAcceleration.x = gsap.utils.clamp(
+      -limit,
+      limit,
+      this.rotationAcceleration.x
+    );
+
     this.rotationAcceleration.y +=
       (movement.x / 10) * Number(this.isPointerDown);
   }

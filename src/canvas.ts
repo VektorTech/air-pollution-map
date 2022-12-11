@@ -76,6 +76,10 @@ export default class Canvas {
       addEventListener("touchmove", ({ touches }) =>
         this.onPointerMove(touches[0].clientX, touches[0].clientY)
       );
+      addEventListener("touchend", (e) => {
+        this._pointerPosition.x = 0;
+        this._pointerPosition.y = 0;
+      });
       this.renderer.setAnimationLoop((time) => this.render(time));
     } else {
       throw new TypeError("HTMLCanvasElement Required");

@@ -3,17 +3,18 @@ uniform vec3 iLightPos;
 
 varying vec2 vUv;
 varying vec3 vNormal;
-varying vec3 vPos;
+varying vec3 vPosition;
 
 void main() {
-	vec4 textureCol = texture2D(iCloudsAlphaMap, vUv);
+	vec4 cloudColor = texture2D(iCloudsAlphaMap, vUv);
 
-	vec3 lightDirection = vec3(iLightPos.xy - vPos.xy, iLightPos.z);
+	vec3 lightDirection = iLightPos - vPosition;
+	vec3 lightDirectionNormalized = normalize(iLightPos - vPosition);
 
-	float angle = max(dot(lightDirection, vNormal), 0.3);
+	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.01);
 
-	vec3 diffuse = textureCol.rgb * pow(angle, 2.0) * 0.8;
-	float y = (diffuse.r * 0.299) + (diffuse.g * 0.587) + (diffuse.b * 0.114);
+	vec3 final = cloudColor.rgb * diffuse;
+	float y = (final.r * 0.299) + (final.g * 0.587) + (final.b * 0.114);
 
 	gl_FragColor = vec4(vec3(1.0), y);
 }

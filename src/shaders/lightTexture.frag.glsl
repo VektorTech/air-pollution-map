@@ -4,21 +4,32 @@ uniform vec3 iLightPos;
 
 varying vec2 vUv;
 varying vec3 vNormal;
-varying vec3 vPos;
+varying vec3 vPosition;
 
 void main() {
-	vec4 mapCol = texture2D(iEarthAlbedo, vUv);
-	vec4 lightCol = texture2D(iLightMap, vUv);
-	float ambient = 0.1;
+	vec3 lightColor = vec3(0.5804, 0.7373, 0.7804);
+	vec3 ambientColor = vec3(0.1216, 0.1255, 0.1333);
 
-	vec3 lightDirection = vec3(iLightPos.xy - vPos.xy, iLightPos.z);
+	vec4 earthColor = texture2D(iEarthAlbedo, vUv);
+	vec4 nightLight = texture2D(iLightMap, vUv);
 
-	float angle = max(dot(lightDirection, vNormal), ambient);
-	float _angle = 1.0 - angle;
-	float attenuation = pow(length(lightDirection) * 0.4, 5.0);
-	float intensity = min(_angle * attenuation, 0.8);
+	vec3 lightDirection = iLightPos - vPosition;
+	vec3 lightDirectionNormalized = normalize(iLightPos - vPosition);
+	vec3 viewDirection = normalize(cameraPosition - vPosition);
 
-	vec3 finalColor = max(mapCol.rgb * pow(angle, 3.0) * 0.6, 0.04) + (lightCol.rgb * intensity);
+	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.0);
+
+	vec3 reflectDirection = reflect(-lightDirection, vNormal);
+	float specularity = pow(max(dot(viewDirection, reflectDirection), 0.0), 3.2);
+	float specular = min(0.07 * specularity, 0.8);
+
+	float attenuation = min(pow(length(lightDirection) * 0.4, 8.0) * 0.6, 0.65);
+	float fresnel = pow(0.93 - max(dot(vNormal, viewDirection), 0.0), 3.0);
+
+	vec3 finalColor =
+		earthColor.rgb *
+		((ambientColor + specular + fresnel + diffuse) * lightColor) +
+		(nightLight.rgb * attenuation);
 
 	gl_FragColor = vec4(finalColor, 1.0);
 }

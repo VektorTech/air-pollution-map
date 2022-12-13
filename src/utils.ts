@@ -6,7 +6,7 @@ const Utils = Object.freeze({
   sphericalToCartesian: (
     latitudeRadians: number,
     longitudeRadians: number,
-    radius: number
+    radius = 1
   ) =>
     new Vector3(
       Math.cos(latitudeRadians) * Math.cos(longitudeRadians) * radius,

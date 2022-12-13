@@ -63,23 +63,39 @@ export default class Canvas {
 
       this.raycaster = new Raycaster();
       this.clock = new Clock();
-      this._pointerPosition = new Vector2();
+      this._pointerPosition = null;
       this._pointerMovement = new Vector2();
+      this._intersectedObjects = [];
 
       this.animationFrameCallbacks = new Map();
       this.moveInteractionCallbacks = new Set();
 
       addEventListener("resize", () => this.resize());
-      addEventListener("pointermove", ({ clientX, clientY }) =>
-        this.onPointerMove(clientX, clientY)
-      );
-      addEventListener("touchmove", ({ touches }) =>
-        this.onPointerMove(touches[0].clientX, touches[0].clientY)
+      addEventListener("pointermove", ({ clientX, clientY }) => {
+        if (!this._pointerPosition) {
+          const { x, y } = this.normalizeCoords(clientX, clientY);
+          this._pointerPosition = new Vector2(x, y);
+        }
+        this.castRay(clientX, clientY);
+        this.onPointerMove(clientX, clientY);
+      });
+      addEventListener("touchmove", ({ touches }) => {
+        if (!this._pointerPosition) {
+          const { x, y } = this.normalizeCoords(
+            touches[0].clientX,
+            touches[0].clientY
+          );
+          this._pointerPosition = new Vector2(x, y);
+        }
+        this.onPointerMove(touches[0].clientX, touches[0].clientY);
+      });
+      addEventListener("click", ({ clientX, clientY }) =>
+        this.castRay(clientX, clientY)
       );
       addEventListener("touchend", (e) => {
-        this._pointerPosition.x = 0;
-        this._pointerPosition.y = 0;
+        this._pointerPosition = null;
       });
+      addEventListener('contextmenu', event => event.preventDefault());
       this.renderer.setAnimationLoop((time) => this.render(time));
     } else {
       throw new TypeError("HTMLCanvasElement Required");
@@ -100,6 +116,13 @@ export default class Canvas {
 
   get canvasScene() {
     return this.scene;
+  }
+
+  private normalizeCoords(x: number, y: number) {
+    return {
+      x: (x / this.width) * 2 - 1,
+      y: -(y / this.height) * 2 + 1,
+    };
   }
 
   private resize() {
@@ -126,21 +149,22 @@ export default class Canvas {
   }
 
   private onPointerMove(clientX: number, clientY: number) {
-    const _pointerPositionX = (clientX / this.width) * 2 - 1;
-    const _pointerPositionY = -(clientY / this.height) * 2 + 1;
+    const { x, y } = this.normalizeCoords(clientX, clientY);
 
-    this._pointerMovement.x = _pointerPositionX - this._pointerPosition.x;
-    this._pointerMovement.y = _pointerPositionY - this._pointerPosition.y;
+    this._pointerMovement.x = x - this._pointerPosition.x;
+    this._pointerMovement.y = y - this._pointerPosition.y;
 
-    this._pointerPosition.x = _pointerPositionX;
-    this._pointerPosition.y = _pointerPositionY;
+    this._pointerPosition.x = x;
+    this._pointerPosition.y = y;
 
     this.moveInteractionCallbacks.forEach((callback) =>
       callback(this._pointerPosition, this._pointerMovement)
     );
+  }
 
-    this.raycaster.setFromCamera(this._pointerPosition, this.camera);
-
+  private castRay(clientX: number, clientY: number) {
+    const coords = this.normalizeCoords(clientX, clientY);
+    this.raycaster.setFromCamera(coords, this.camera);
     this._intersectedObjects = this.raycaster.intersectObjects(
       this.scene.children
     );

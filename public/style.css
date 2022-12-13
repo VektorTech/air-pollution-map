@@ -6,9 +6,14 @@
   box-sizing: border-box;
 }
 
+html {
+  touch-action: manipulation;
+}
+
 body {
   overflow: hidden;
   background-color: #080808;
+  user-select: none;
 }
 
 canvas {

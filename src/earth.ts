@@ -1,7 +1,6 @@
 import gsap from "gsap";
 
 import {
-  MeshBasicMaterial,
   ShaderMaterial,
   SphereGeometry,
   TextureLoader,
@@ -13,7 +12,6 @@ import {
   Object3D,
   Event,
   FrontSide,
-  BackSide,
   Quaternion,
 } from "three";
 
@@ -22,6 +20,7 @@ import Utils from "./utils";
 import standardVertexShader from "./shaders/standard.vert.glsl";
 import lightTextureShader from "./shaders/lightTexture.frag.glsl";
 import cloudsTextureShader from "./shaders/cloudsTexture.frag.glsl";
+import Marker from "./marker";
 
 export default class Earth {
   private earth: Mesh;
@@ -31,6 +30,7 @@ export default class Earth {
   private pauseState: boolean;
   private zoomState: boolean;
   private activeMarker: Intersection;
+  private marker: Marker;
 
   private clicked = false;
 
@@ -82,6 +82,8 @@ export default class Earth {
     this.clouds = new Mesh(cloudsGeometry, cloudsMaterial);
     this.clouds.raycast = () => undefined;
     this.earth.add(this.clouds);
+
+    this.marker = new Marker();
 
     this.rotationAcceleration = new Vector2();
     this.rotationVelocity = new Vector2();
@@ -142,22 +144,7 @@ export default class Earth {
     longitude: number,
     details?: Record<string, unknown>
   ) {
-    const material = new MeshBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.8,
-    });
-    const sphere = new Mesh(
-      new SphereGeometry(0.05, 8, 8),
-      new MeshBasicMaterial({
-        color: 0x000000,
-        transparent: true,
-        opacity: 0.0,
-        side: BackSide,
-      })
-    );
-    const sphereInner = new Mesh(new SphereGeometry(1.3e-2, 8, 8), material);
-    sphere.add(sphereInner);
+    const _marker = this.marker.newMarker;
     const latitudeRad = Utils.degreesToRadians(latitude);
     const longitudeRad = Utils.degreesToRadians(longitude);
 
@@ -166,15 +153,14 @@ export default class Earth {
       -longitudeRad,
       this.earth.scale.x
     );
-    sphere.userData = {
+    _marker.userData = {
       latitudeRad,
       longitudeRad,
       position: { x, y, z },
       details,
     };
-    sphere.position.set(x, y, z);
-    sphere.name = "Marker";
-    this.earth.add(sphere);
+    _marker.position.set(x, y, z);
+    this.earth.add(_marker);
   }
 
   update(delta: number) {

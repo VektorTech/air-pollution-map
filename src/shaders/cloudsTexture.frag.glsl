@@ -11,9 +11,9 @@ void main() {
 	vec3 lightDirection = iLightPos - vPosition;
 	vec3 lightDirectionNormalized = normalize(iLightPos - vPosition);
 	vec3 viewDirection = normalize(cameraPosition - vPosition);
+	vec3 reflectDirection = reflect(-lightDirection, vNormal);
 
 	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.02);
-	vec3 reflectDirection = reflect(-lightDirection, vNormal);
 	float specularity = pow(max(dot(viewDirection, reflectDirection), 0.0), 3.2);
 	float specular = min(0.08 * specularity, 0.7);
 

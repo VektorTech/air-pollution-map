@@ -17,8 +17,8 @@ module.exports = {
       },
       {
         test: /\.glsl$/i,
-        exclude: /node_modules/,
-        use: ["raw-loader", "glslify-loader"]
+        use: ["raw-loader", "glslify-loader"],
+        exclude: /node_modules/
       }
     ]
   },

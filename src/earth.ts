@@ -35,7 +35,6 @@ export default class Earth {
   private clicked = false;
 
   private rotationVelocity: Vector2;
-  private rotationAcceleration: Vector2;
 
   private readonly DAMP_ROT_FACTOR_X = 0.99;
   private readonly DAMP_ROT_FACTOR_Y = 0.88;
@@ -85,7 +84,6 @@ export default class Earth {
 
     this.marker = new Marker();
 
-    this.rotationAcceleration = new Vector2();
     this.rotationVelocity = new Vector2();
 
     this.isPointerDown = false;
@@ -94,46 +92,11 @@ export default class Earth {
 
     scene.add(this.earth);
 
-    const timeThreshold = 350;
-    const distanceThreshold = 5;
-
-    let pointerTime = 0;
-    let pointerPosX = 0;
-    let pointerPosY = 0;
-
-    addEventListener("pointerdown", ({ clientX, clientY }) => {
-      pointerTime = performance.now();
-      pointerPosX = clientX;
-      pointerPosY = clientY;
-      this.isPointerDown = true;
-    });
-    addEventListener("touchstart", ({ touches }) => {
-      if (touches.length == 1) {
-        pointerTime = performance.now();
-        pointerPosX = touches[0].clientX;
-        pointerPosY = touches[0].clientY;
-      }
-      this.isPointerDown = true;
-    });
-    addEventListener("pointerup", ({ clientX, clientY }) => {
-      const isClick =
-        new Vector2(clientX - pointerPosX, clientY - pointerPosY).length() <
-          distanceThreshold && performance.now() - pointerTime < timeThreshold;
-
-      this.clicked = isClick;
-      this.isPointerDown = false;
-    });
-    addEventListener("touchend", ({ changedTouches }) => {
-      const isClick =
-        new Vector2(
-          changedTouches[0].clientX - pointerPosX,
-          changedTouches[0].clientY - pointerPosY
-        ).length() < distanceThreshold &&
-        performance.now() - pointerTime < timeThreshold;
-
-      this.clicked = isClick;
-      this.isPointerDown = false;
-    });
+    addEventListener("pointerdown", () => (this.isPointerDown = true));
+    addEventListener("touchstart", () => (this.isPointerDown = true));
+    addEventListener("pointerup", () => (this.isPointerDown = false));
+    addEventListener("touchend", () => (this.isPointerDown = false));
+    addEventListener("fastclick", () => (this.clicked = true));
   }
 
   pinMarker(
@@ -165,12 +128,12 @@ export default class Earth {
 
     if (!this.zoomState) {
       if (this.isPointerDown || this.pauseState) {
-        this.rotationAcceleration.y *= this.DAMP_ROT_FACTOR_Y;
+        this.rotationVelocity.y *= this.DAMP_ROT_FACTOR_Y;
       } else {
-        this.rotationAcceleration.x *= this.DAMP_ROT_FACTOR_X;
+        this.rotationVelocity.x *= this.DAMP_ROT_FACTOR_X;
 
-        this.rotationAcceleration.y = gsap.utils.interpolate(
-          this.rotationAcceleration.y,
+        this.rotationVelocity.y = gsap.utils.interpolate(
+          this.rotationVelocity.y,
           Utils.degreesToRadians(5) * delta,
           0.1
         );
@@ -178,12 +141,11 @@ export default class Earth {
 
       this.earth.rotation.x = gsap.utils.interpolate(
         this.earth.rotation.x,
-        this.rotationAcceleration.x,
+        this.rotationVelocity.x,
         0.1
       );
 
-      this.rotationVelocity.y += this.rotationAcceleration.y;
-      this.earth.rotation.y = this.rotationVelocity.y;
+      this.earth.rotation.y += this.rotationVelocity.y;
     }
 
     this.clouds.rotation.y += Math.PI * delta * 3e-2;
@@ -206,7 +168,10 @@ export default class Earth {
       .to(step, { value: 1, duration: 1 })
       .eventCallback("onUpdate", () => {
         console.log(this);
-        const inQuaternionRange = startQuaternion.slerp(endQuaternion, step.value);
+        const inQuaternionRange = startQuaternion.slerp(
+          endQuaternion,
+          step.value
+        );
         this.earth.setRotationFromQuaternion(inQuaternionRange);
       })
       .eventCallback("onComplete", () => {
@@ -249,14 +214,14 @@ export default class Earth {
   onMoveInteraction(position: Vector2, movement: Vector2) {
     const limit = Utils.degreesToRadians(60);
     if (!this.zoomState) {
-      this.rotationAcceleration.x += -movement.y * Number(this.isPointerDown);
-      this.rotationAcceleration.x = gsap.utils.clamp(
+      this.rotationVelocity.x += -movement.y * Number(this.isPointerDown);
+      this.rotationVelocity.x = gsap.utils.clamp(
         -limit,
         limit,
-        this.rotationAcceleration.x
+        this.rotationVelocity.x
       );
 
-      this.rotationAcceleration.y +=
+      this.rotationVelocity.y +=
         (movement.x / 10) * Number(this.isPointerDown);
     }
   }

@@ -8,7 +8,7 @@ varying vec3 vPosition;
 
 void main() {
 	vec3 lightColor = vec3(0.902, 0.902, 0.902);
-	vec3 ambientColor = vec3(0.1255, 0.1255, 0.1255);
+	vec3 ambientColor = vec3(0.1686, 0.1686, 0.1686);
 
 	vec4 earthColor = texture2D(iEarthAlbedo, vUv);
 	vec4 nightLight = texture2D(iLightMap, vUv);

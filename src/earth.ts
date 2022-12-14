@@ -105,8 +105,8 @@ export default class Earth {
     details?: Record<string, unknown>
   ) {
     const _marker = this.marker.newMarker;
-    const latitudeRad = Utils.degreesToRadians(latitude);
-    const longitudeRad = Utils.degreesToRadians(longitude);
+    const latitudeRad = MathUtils.degToRad(latitude);
+    const longitudeRad = MathUtils.degToRad(longitude);
 
     const { x, y, z } = Utils.sphericalToCartesian(
       latitudeRad,
@@ -134,12 +134,12 @@ export default class Earth {
 
         this.rotationVelocity.y = gsap.utils.interpolate(
           this.rotationVelocity.y,
-          Utils.degreesToRadians(5) * delta,
+          MathUtils.degToRad(5) * delta,
           0.1
         );
       }
 
-      this.earth.rotation.x = gsap.utils.interpolate(
+      this.earth.rotation.x = MathUtils.damp(
         this.earth.rotation.x,
         this.rotationVelocity.x,
         0.1
@@ -202,9 +202,9 @@ export default class Earth {
         const { phi, theta } = Utils.cartesianToDegrees(
           earthIntersection.face.normal
         );
-        const lat = Utils.radiansToDegrees(phi);
-        const long = -Utils.radiansToDegrees(theta);
-        console.log(lat, long);
+        const lat = MathUtils.radToDeg(phi);
+        const long = -MathUtils.radToDeg(theta);
+
       }
 
       this.clicked = false;

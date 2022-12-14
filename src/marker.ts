@@ -10,9 +10,9 @@ export default class Marker {
 
   constructor() {
     this.material = new MeshBasicMaterial({
-      color: 0xffffff,
+      color: 0xcccccc,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.7,
     });
     this.geometry = new SphereGeometry(0.05, 8, 8);
     this.material = new MeshBasicMaterial({

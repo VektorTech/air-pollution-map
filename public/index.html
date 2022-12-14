@@ -5,13 +5,33 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>Air Pollution Globe</title>
+	<title>Air Quality Earth</title>
 
 	<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 	<canvas id="root"></canvas>
+
+	<main class="main">
+		<div class="container">
+			<header>
+				<div class="header-container">
+					<h1 class="heading">AQ Earth</h1>
+				</div>
+			</header>
+			<div class="panel">
+				<!-- <input placeholder="Search" type="text" class="search"> -->
+
+				<time id="time-local"></time>
+				<br>
+				<div id="coordinates"></div>
+
+				<div class="key"></div>
+			</div>
+		</div>
+	</main>
+
 	<script src="script.bundle.js"></script>
 </body>
 

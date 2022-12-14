@@ -8,15 +8,58 @@
 
 html {
   touch-action: manipulation;
+  font-size: 62.5%;
 }
 
 body {
   overflow: hidden;
   background-color: #080808;
+  color: #fff;
   user-select: none;
 }
 
 canvas {
   width: 100vw !important;
   height: 100vh !important;
+}
+
+.main {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.container {
+  width: calc(100% - 2rem);
+  height: 100%;
+  margin: 0 auto;
+}
+
+header {
+  height: 4rem;
+  line-height: 4rem;
+}
+
+.header-container {
+  text-align: center;
+}
+
+.panel {
+  display: inline-block;
+  width: 100%;
+  max-width: 38rem;
+  height: calc(100% - 4rem);
+}
+
+.search {
+  background-color: transparent;
+  display: block;
+  border: none;
+  outline: none;
+  border-bottom: 0.1rem solid #666;
+  color: #666;
+  caret-color: #666;
 }

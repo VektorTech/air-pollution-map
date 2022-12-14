@@ -23,9 +23,9 @@ void main() {
 	float specularity = pow(max(dot(viewDirection, reflectDirection), 0.0), 3.2);
 	float specular = min(0.07 * specularity, 0.8);
 
-	float attenuation = min(pow(length(lightDirection) * 0.4, 8.0) * 0.6, 0.65) *
-		(1.0 - specularity);
-	float fresnel = pow(0.87 - max(dot(vNormal, viewDirection), 0.0), 3.0);
+	float attenuation = min(pow(length(lightDirection) * 0.4, 8.0) * 0.6 *
+		(1.0 - specularity), 0.55);
+	float fresnel = pow(0.75 - max(dot(vNormal, viewDirection), 0.0), 3.0);
 
 	vec3 finalColor =
 		earthColor.rgb *

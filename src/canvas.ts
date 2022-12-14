@@ -8,7 +8,15 @@ import {
   Scene,
   Event,
   Clock,
+
+  ReinhardToneMapping,
+  HalfFloatType
 } from "three";
+
+import {EffectComposer} from "three/examples/jsm/postprocessing/EffectComposer";
+import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass";
+import {UnrealBloomPass} from "three/examples/jsm/postprocessing/UnrealBloomPass";
+import {ShaderPass} from "three/examples/jsm/postprocessing/ShaderPass";
 
 export default class Canvas {
   private canvas: HTMLCanvasElement;
@@ -17,6 +25,7 @@ export default class Canvas {
   private scene: Scene;
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
+  private composer: EffectComposer;
   private raycaster: Raycaster;
   private clock: Clock;
   private animationFrameCallbacks: Map<
@@ -60,6 +69,13 @@ export default class Canvas {
       });
       this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
       this.renderer.setSize(this.width, this.height);
+      // this.renderer.toneMapping = ReinhardToneMapping;
+
+      const renderScene = new RenderPass( this.scene, this.camera );
+      // const unrealbloomPass = new UnrealBloomPass(new Vector2(innerWidth, innerHeight), 0.9, 0.1, 0.4);
+      this.composer = new EffectComposer(this.renderer);
+      this.composer.addPass(renderScene);
+      // this.composer.addPass(unrealbloomPass);
 
       this.raycaster = new Raycaster();
       this.clock = new Clock();
@@ -138,11 +154,12 @@ export default class Canvas {
   }
 
   private render(time: number) {
-    this.renderer.render(this.scene, this.camera);
+    const delta = this.clock.getDelta();
+    this.composer.render(delta);
 
     this.animationFrameCallbacks.forEach((timeInfo, callback) => {
       if (time - timeInfo.lastCalled >= timeInfo.interval) {
-        callback(time, this.clock.getDelta());
+        callback(time, delta);
         timeInfo.lastCalled = time;
       }
     });

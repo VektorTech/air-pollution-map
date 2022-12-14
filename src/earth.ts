@@ -134,9 +134,6 @@ export default class Earth {
       this.clicked = isClick;
       this.isPointerDown = false;
     });
-
-    // @ts-ignore
-    window.zoomOut = this.zoomOut.bind(this);
   }
 
   pinMarker(
@@ -204,11 +201,12 @@ export default class Earth {
     const startQuaternion = this.earth.quaternion.clone().normalize();
     this.zoomState = true;
 
-    let p = { step: 0 };
+    const step = { value: 0 };
     gsap
-      .to(p, { step: 1, duration: 1 })
+      .to(step, { value: 1, duration: 1 })
       .eventCallback("onUpdate", () => {
-        const inQuaternionRange = startQuaternion.slerp(endQuaternion, p.step);
+        console.log(this);
+        const inQuaternionRange = startQuaternion.slerp(endQuaternion, step.value);
         this.earth.setRotationFromQuaternion(inQuaternionRange);
       })
       .eventCallback("onComplete", () => {

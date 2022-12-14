@@ -148,8 +148,22 @@ export default class Earth {
       this.earth.rotation.y += this.rotationVelocity.y;
     }
 
-    this.clouds.rotation.y += Math.PI * delta * 3e-2;
-    this.clouds.rotation.z += -Math.PI * delta * 1e-2;
+    this.clouds.rotation.y += Math.PI * delta * 2e-2;
+    this.clouds.rotation.z += -Math.PI * delta * 1e-3;
+  }
+
+  onMoveInteraction(position: Vector2, movement: Vector2) {
+    const limit = MathUtils.degToRad(60);
+    if (!this.zoomState) {
+      this.rotationVelocity.x += -movement.y * Number(this.isPointerDown);
+      this.rotationVelocity.x = gsap.utils.clamp(
+        -limit,
+        limit,
+        this.rotationVelocity.x
+      );
+
+      this.rotationVelocity.y += (movement.x / 6) * Number(this.isPointerDown);
+    }
   }
 
   private zoomIn(markerIntersection: Intersection) {
@@ -208,21 +222,6 @@ export default class Earth {
       }
 
       this.clicked = false;
-    }
-  }
-
-  onMoveInteraction(position: Vector2, movement: Vector2) {
-    const limit = Utils.degreesToRadians(60);
-    if (!this.zoomState) {
-      this.rotationVelocity.x += -movement.y * Number(this.isPointerDown);
-      this.rotationVelocity.x = gsap.utils.clamp(
-        -limit,
-        limit,
-        this.rotationVelocity.x
-      );
-
-      this.rotationVelocity.y +=
-        (movement.x / 10) * Number(this.isPointerDown);
     }
   }
 }

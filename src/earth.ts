@@ -35,7 +35,7 @@ export default class Earth {
   private zoomState: boolean;
   private clicked = false;
 
-  private rotationVelocity: Vector2;
+  private coordinateSelectedObserver: (lat: number, long: number) => void;
 
   private readonly DAMP_ROT_FACTOR_X = 0.99;
   private readonly DAMP_ROT_FACTOR_Y = 0.88;
@@ -200,6 +200,10 @@ export default class Earth {
     this.activeMarker = null;
   }
 
+  onCoordinateSelected(observer: (lat: number, long: number) => void) {
+    this.coordinateSelectedObserver = observer;
+  }
+
   checkActiveObjects(intersections: Intersection<Object3D<Event>>[]) {
     const markerIntersection = intersections.find(
       (current) => current.object.name == "Marker"
@@ -221,6 +225,7 @@ export default class Earth {
         const lat = MathUtils.radToDeg(phi);
         const long = -MathUtils.radToDeg(theta);
 
+        this.coordinateSelectedObserver?.(lat, long);
       }
 
       this.clicked = false;

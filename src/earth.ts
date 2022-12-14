@@ -1,18 +1,19 @@
 import gsap from "gsap";
 
 import {
-  ShaderMaterial,
   SphereGeometry,
+  ShaderMaterial,
   TextureLoader,
+  Intersection,
+  Quaternion,
+  MathUtils,
+  FrontSide,
+  Object3D,
   Vector2,
   Vector3,
   Scene,
-  Mesh,
-  Intersection,
-  Object3D,
   Event,
-  FrontSide,
-  Quaternion,
+  Mesh,
 } from "three";
 
 import Utils from "./utils";
@@ -25,13 +26,13 @@ import Marker from "./marker";
 export default class Earth {
   private earth: Mesh;
   private clouds: Mesh;
+  private marker: Marker;
+  private rotationVelocity: Vector2;
+  private activeMarker: Intersection;
 
   private isPointerDown: boolean;
   private pauseState: boolean;
   private zoomState: boolean;
-  private activeMarker: Intersection;
-  private marker: Marker;
-
   private clicked = false;
 
   private rotationVelocity: Vector2;
@@ -142,7 +143,8 @@ export default class Earth {
       this.earth.rotation.x = MathUtils.damp(
         this.earth.rotation.x,
         this.rotationVelocity.x,
-        0.1
+        10,
+        delta
       );
 
       this.earth.rotation.y += this.rotationVelocity.y;
@@ -181,7 +183,6 @@ export default class Earth {
     gsap
       .to(step, { value: 1, duration: 1 })
       .eventCallback("onUpdate", () => {
-        console.log(this);
         const inQuaternionRange = startQuaternion.slerp(
           endQuaternion,
           step.value
@@ -194,8 +195,8 @@ export default class Earth {
   }
 
   private zoomOut() {
-    this.earth.rotation.set(0, 0, 0);
     this.zoomState = false;
+    this.earth.rotation.set(0, 0, 0);
     this.activeMarker = null;
   }
 
@@ -204,6 +205,7 @@ export default class Earth {
       (current) => current.object.name == "Marker"
     );
     this.pauseState = markerIntersection && markerIntersection.distance < 2.5;
+    document.body.style.cursor = this.pauseState ? "pointer" : "auto";
 
     if (this.clicked) {
       this.zoomIn(markerIntersection);

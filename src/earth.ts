@@ -52,8 +52,8 @@ export default class Earth {
         "./assets/textures/cloudsDiffuse.jpg"
       );
 
-    const geometry = new SphereGeometry(1, 60, 60);
-    const cloudsGeometry = new SphereGeometry(1.006, 60, 60);
+    const geometry = new SphereGeometry(1, 150, 150);
+    const cloudsGeometry = new SphereGeometry(1.006, 150, 150);
 
     const lightPos = new Vector3(-1.5, 1.8, -3.2);
     const material = new ShaderMaterial({

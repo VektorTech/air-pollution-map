@@ -8,15 +8,15 @@ import {
   Scene,
   Event,
   Clock,
-
-  ReinhardToneMapping,
-  HalfFloatType
+  MathUtils,
+  // ReinhardToneMapping,
+  // HalfFloatType,
 } from "three";
 
-import {EffectComposer} from "three/examples/jsm/postprocessing/EffectComposer";
-import {RenderPass} from "three/examples/jsm/postprocessing/RenderPass";
-import {UnrealBloomPass} from "three/examples/jsm/postprocessing/UnrealBloomPass";
-import {ShaderPass} from "three/examples/jsm/postprocessing/ShaderPass";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+// import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
+// import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
 
 export default class Canvas {
   private canvas: HTMLCanvasElement;
@@ -37,6 +37,8 @@ export default class Canvas {
   private _pointerMovement: Vector2;
   private _intersectedObjects: Intersection<Object3D<Event>>[];
 
+  private _wheelDeltaY: number;
+
   constructor(canvasElement: string | HTMLCanvasElement) {
     let _canvas;
     if (typeof canvasElement == "string") {
@@ -55,7 +57,7 @@ export default class Canvas {
 
       this.scene = new Scene();
       this.camera = new PerspectiveCamera(
-        window.innerWidth < 420 ? 85 : 70,
+        window.innerWidth < 420 ? 80 : 60,
         this.width / this.height,
         0.1,
         10
@@ -71,7 +73,7 @@ export default class Canvas {
       this.renderer.setSize(this.width, this.height);
       // this.renderer.toneMapping = ReinhardToneMapping;
 
-      const renderScene = new RenderPass( this.scene, this.camera );
+      const renderScene = new RenderPass(this.scene, this.camera);
       // const unrealbloomPass = new UnrealBloomPass(new Vector2(innerWidth, innerHeight), 0.9, 0.1, 0.4);
       this.composer = new EffectComposer(this.renderer);
       this.composer.addPass(renderScene);
@@ -85,6 +87,8 @@ export default class Canvas {
 
       this.animationFrameCallbacks = new Map();
       this.moveInteractionCallbacks = new Set();
+
+      this._wheelDeltaY = 0;
 
       addEventListener("resize", () => this.resize());
       addEventListener("pointermove", ({ clientX, clientY }) => {
@@ -111,7 +115,10 @@ export default class Canvas {
       addEventListener("touchend", (e) => {
         this._pointerPosition = null;
       });
-      addEventListener('contextmenu', event => event.preventDefault());
+      addEventListener("wheel", (e) => {
+        this._wheelDeltaY = e.deltaY;
+      });
+      addEventListener("contextmenu", (event) => event.preventDefault());
       this.renderer.setAnimationLoop((time) => this.render(time));
     } else {
       throw new TypeError("HTMLCanvasElement Required");
@@ -146,7 +153,7 @@ export default class Canvas {
     this.height = window.innerHeight;
 
     this.camera.aspect = this.width / this.height;
-    this.camera.fov = window.innerWidth < 420 ? 85 : 70;
+    this.camera.fov = window.innerWidth < 420 ? 80 : 60;
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(this.width, this.height);
@@ -156,6 +163,14 @@ export default class Canvas {
   private render(time: number) {
     const delta = this.clock.getDelta();
     this.composer.render(delta);
+
+    this.camera.fov = MathUtils.damp(
+      this.camera.fov,
+      MathUtils.clamp(this.camera.fov + this._wheelDeltaY, 45, 80),
+      1,
+      delta
+    );
+    this.camera.updateProjectionMatrix();
 
     this.animationFrameCallbacks.forEach((timeInfo, callback) => {
       if (time - timeInfo.lastCalled >= timeInfo.interval) {

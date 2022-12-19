@@ -6,9 +6,20 @@
   box-sizing: border-box;
 }
 
+@font-face {
+  font-family: creato-display;
+  src: url(/assets/fonts/CreatoDisplay-Regular.otf);
+}
+
+@font-face {
+  font-family: quick;
+  src: url(/assets/fonts/Quick.ttf);
+}
+
 html {
   touch-action: manipulation;
   font-size: 62.5%;
+  font-family: "creato-display";
 }
 
 body {
@@ -39,8 +50,7 @@ canvas {
 }
 
 header {
-  height: 4rem;
-  line-height: 4rem;
+  font-family: quick;
 }
 
 .header-container {

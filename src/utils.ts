@@ -11,12 +11,12 @@ const Utils = Object.freeze({
       Math.sin(latitudeRadians) * radius,
       Math.cos(latitudeRadians) * Math.sin(longitudeRadians) * radius
     ),
-  cartesianToDegrees: (vec: Vector3) => {
+  cartesianToSpherical: (vec: Vector3) => {
     const { x, y, z } = vec;
     const radius = vec.length();
     const xz = Math.sqrt(x ** 2 + z ** 2);
     const phi = Math.atan(y / xz);
-    const theta = Math.acos(x / xz);
+    const theta = -Math.atan2(z, x);
 
     return { radius, phi, theta };
   },

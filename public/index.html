@@ -17,18 +17,33 @@
 		<div class="container">
 			<header>
 				<div class="header-container">
-					<h1 class="heading">AQ Earth</h1>
+					<h1 class="heading">AQ Earth<sup style="font-size: 18px;">&reg;</sup></h1>
 				</div>
 			</header>
 			<div class="panel">
 				<!-- <input placeholder="Search" type="text" class="search"> -->
 
-				<time id="time-local"></time>
-				<br>
-				<div id="coordinates"></div>
+				<div class="details">
+					<time id="time-local"></time>
+					<div id="coordinates"></div>
+					<div id="location"></div>
+					<div id="quality"></div>
+				</div>
 
-				<div class="key"></div>
+				<div class="key">
+					<p class="key-title">Air Quality Index Scale</p>
+					<div class="key-scale"></div>
+					<ul class="key-names">
+						<li>Good</li>
+						<li>Fair</li>
+						<li>Moderate</li>
+						<li>Bad</li>
+						<li>Hazardous</li>
+					</ul>
+				</div>
 			</div>
+
+			<div id="charts"></div>
 		</div>
 	</main>
 

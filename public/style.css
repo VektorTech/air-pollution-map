@@ -27,9 +27,13 @@ body {
   background-color: #080808;
   color: #fff;
   user-select: none;
+  font-size: clamp(1.1rem, 1.5vw, 1.5rem);
 }
 
-canvas {
+#root {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100vw !important;
   height: 100vh !important;
 }
@@ -44,24 +48,33 @@ canvas {
 }
 
 .container {
-  width: calc(100% - 2rem);
+  width: calc(100% - 5rem);
   height: 100%;
   margin: 0 auto;
 }
 
 header {
+  height: 6rem;
+  line-height: 6rem;
+}
+
+.heading {
   font-family: quick;
+  font-size: 3.4rem;
 }
 
 .header-container {
   text-align: center;
+  height: 100%;
 }
 
 .panel {
   display: inline-block;
   width: 100%;
-  max-width: 38rem;
-  height: calc(100% - 4rem);
+  max-width: 36rem;
+  height: calc(100% - 6rem);
+  padding-top: 4rem;
+  position: relative;
 }
 
 .search {
@@ -72,4 +85,121 @@ header {
   border-bottom: 0.1rem solid #666;
   color: #666;
   caret-color: #666;
+}
+
+.details {
+  display: flex;
+  gap: 1.5rem;
+  flex-direction: column;
+}
+
+.key {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  grid-template-rows: 1fr 1fr;
+  position: absolute;
+  bottom: 3rem;
+  column-gap: 0.5rem;
+}
+
+.key-title {
+  align-self: center;
+  grid-row-start: 1;
+  grid-row-end: 3;
+}
+
+.key-scale {
+  background: linear-gradient(
+    to right,
+    green,
+    yellow,
+    orange,
+    red,
+    darkred,
+    transparent
+  );
+  height: 0.5rem;
+  align-self: center;
+}
+
+.key-names {
+  list-style-type: none;
+  grid-column-start: 2;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  font-size: 1.1rem;
+}
+
+.key-names li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quality-1,
+.quality-2,
+.quality-3,
+.quality-4,
+.quality-5 {
+  display: inline-block;
+  padding: 0.2rem 0.8rem;
+  vertical-align: middle;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 0.1rem 0.1rem 0.2rem black;
+}
+
+.quality-1 {
+  background-color: green;
+}
+.quality-2 {
+  background-color: yellow;
+}
+.quality-3 {
+  background-color: orange;
+}
+.quality-4 {
+  background-color: red;
+}
+.quality-5 {
+  background-color: darkred;
+}
+.quality-6 {
+  background-color: #222;
+}
+
+#charts {
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  max-width: 25rem;
+  height: calc(100% - 12rem);
+  float: right;
+  padding-right: 0.5rem;
+}
+
+#charts::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+#charts::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#charts::-webkit-scrollbar-thumb {
+  background: rgb(110, 110, 110);
+}
+
+@media screen and (max-width: 991px) {
+  #charts {
+    display: none;
+  }
+}
+
+@media screen and (max-height: 420px) {
+  .panel {
+    padding-top: 1.5rem;
+  }
 }

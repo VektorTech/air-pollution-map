@@ -35,9 +35,13 @@ export default class Earth {
   private zoomState: boolean;
   private clicked = false;
 
+  private lastMarker: Mesh;
+
+  private imageData: ImageData;
+
   private coordinateSelectedObserver: (lat: number, long: number) => void;
 
-  private readonly DAMP_ROT_FACTOR_X = 0.99;
+  private readonly DAMP_ROT_FACTOR_X = 0.995;
   private readonly DAMP_ROT_FACTOR_Y = 0.88;
 
   public readonly name = "Earth";
@@ -54,7 +58,7 @@ export default class Earth {
       );
 
     const geometry = new SphereGeometry(1, 150, 150);
-    const cloudsGeometry = new SphereGeometry(1.006, 150, 150);
+    const cloudsGeometry = new SphereGeometry(1.006, 75, 75);
 
     const lightPos = new Vector3(-1.5, 1.8, -3.2);
     const material = new ShaderMaterial({
@@ -91,6 +95,16 @@ export default class Earth {
     this.pauseState = false;
     this.zoomState = false;
 
+    new TextureLoader().load("https://ksenia-k.com/img/threejs/earth-map.jpeg", (texture) => {
+      const image = texture.image;
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const context = canvas.getContext('2d');
+      context.drawImage(image, 0, 0);
+      this.imageData = context.getImageData(0, 0, image.width, image.height);
+    });
+
     scene.add(this.earth);
 
     addEventListener("pointerdown", () => (this.isPointerDown = true));
@@ -100,11 +114,16 @@ export default class Earth {
     addEventListener("fastclick", () => (this.clicked = true));
   }
 
+  get earthMesh() { return this.earth; }
+
   pinMarker(
     latitude: number,
     longitude: number,
     details?: Record<string, unknown>
   ) {
+    this.earth.remove(this.lastMarker);
+    delete this.lastMarker;
+
     const _marker = this.marker.newMarker;
     const latitudeRad = MathUtils.degToRad(latitude);
     const longitudeRad = MathUtils.degToRad(longitude);
@@ -122,6 +141,7 @@ export default class Earth {
     };
     _marker.position.set(x, y, z);
     this.earth.add(_marker);
+    this.lastMarker = _marker;
   }
 
   update(delta: number) {
@@ -135,7 +155,7 @@ export default class Earth {
 
         this.rotationVelocity.y = gsap.utils.interpolate(
           this.rotationVelocity.y,
-          MathUtils.degToRad(5) * delta,
+          MathUtils.degToRad(1.5) * delta,
           0.1
         );
       }
@@ -157,14 +177,14 @@ export default class Earth {
   onMoveInteraction(position: Vector2, movement: Vector2) {
     const limit = MathUtils.degToRad(60);
     if (!this.zoomState) {
-      this.rotationVelocity.x += -movement.y * Number(this.isPointerDown);
+      this.rotationVelocity.x += -movement.y * 0.6 * Number(this.isPointerDown);
       this.rotationVelocity.x = gsap.utils.clamp(
         -limit,
         limit,
         this.rotationVelocity.x
       );
 
-      this.rotationVelocity.y += (movement.x / 6) * Number(this.isPointerDown);
+      this.rotationVelocity.y += (movement.x / 15) * Number(this.isPointerDown);
     }
   }
 
@@ -208,27 +228,34 @@ export default class Earth {
     const markerIntersection = intersections.find(
       (current) => current.object.name == "Marker"
     );
-    this.pauseState = markerIntersection && markerIntersection.distance < 2.5;
-    document.body.style.cursor = this.pauseState ? "pointer" : "auto";
+    const earthIntersection = intersections.find(
+      (current) => current.object.name == this.name
+    );
 
-    if (this.clicked) {
+    this.pauseState = !!earthIntersection;
+
+    let isHovered = false;
+    if (this.pauseState && this.imageData) {
+      const _x = Math.floor(earthIntersection.uv.x * this.imageData.width);
+      const _y = Math.floor((1 - earthIntersection.uv.y) * this.imageData.height);
+      const position = (_x + this.imageData.width * _y) * 4;
+      isHovered = this.imageData.data[position] < 100;
+      document.body.style.cursor = isHovered ? "pointer" : "auto";
+    }
+
+    if (this.clicked && isHovered) {
       this.zoomIn(markerIntersection);
 
-      const earthIntersection = intersections.find(
-        (current) => current.object.name == this.name
-      );
-
       if (earthIntersection) {
-        const { phi, theta } = Utils.cartesianToDegrees(
+        const { phi, theta } = Utils.cartesianToSpherical(
           earthIntersection.face.normal
         );
         const lat = MathUtils.radToDeg(phi);
-        const long = -MathUtils.radToDeg(theta);
+        const long = MathUtils.radToDeg(theta);
 
         this.coordinateSelectedObserver?.(lat, long);
       }
-
-      this.clicked = false;
     }
+    this.clicked = false;
   }
 }

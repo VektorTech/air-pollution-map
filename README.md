@@ -1,6 +1,6 @@
 # AQ Earth
 
-AQ Earth is a data visualization of the current air quality index for various locations around the world plotted onto a 3D globe, made with three js. The user can click on random location to get more detailed information around that coordinate. Data is fetched from three different APIs, Open Weather Maps, IQ Air and World AQI.
+AQ Earth is a data visualization of the current air quality index for various locations around the world plotted onto a 3D globe. The user can click on random location to get more detailed information around that coordinate. Data is fetched from three different APIs: Open Weather Maps, IQ Air & World AQI.
 
 ## Tech
 

@@ -1,17 +1,17 @@
-import { MeshBasicMaterial, SphereGeometry, Mesh, BackSide } from "three";
+import { SpriteMaterial, Sprite, TextureLoader } from "three";
 
+const map = new TextureLoader().load("./assets/textures/target.png");
 export default class Marker {
-  private innerMaterial: MeshBasicMaterial;
-  private innerGeometry: SphereGeometry;
-  private mesh: Mesh;
+  private innerMaterial: SpriteMaterial;
+  private sprite: Sprite;
 
   constructor() {
-    this.innerGeometry = new SphereGeometry(1.2e-2, 6, 6);
-    this.mesh = new Mesh(this.innerGeometry, this.innerMaterial);
-    this.mesh.name = "Marker";
+    this.innerMaterial = new SpriteMaterial({ map: map });
+    this.sprite = new Sprite(this.innerMaterial);
+    this.sprite.scale.set(0.05, 0.05, 0.05);
   }
 
   get newMarker() {
-    return this.mesh.clone();
+    return this.sprite.clone();
   }
 }

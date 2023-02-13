@@ -14,6 +14,7 @@ import {
   Scene,
   Event,
   Mesh,
+  Sprite,
 } from "three";
 
 import Utils from "./utils";
@@ -35,7 +36,7 @@ export default class Earth {
   private zoomState: boolean;
   private clicked = false;
 
-  private lastMarker: Mesh;
+  private lastMarker: Sprite;
 
   private imageData: ImageData;
 
@@ -139,7 +140,7 @@ export default class Earth {
       position: { x, y, z },
       details,
     };
-    _marker.position.set(x, y, z);
+    _marker.position.set(x * 1.03, y * 1.03, z * 1.03);
     this.earth.add(_marker);
     this.lastMarker = _marker;
   }
@@ -240,8 +241,8 @@ export default class Earth {
       const _y = Math.floor((1 - earthIntersection.uv.y) * this.imageData.height);
       const position = (_x + this.imageData.width * _y) * 4;
       isHovered = this.imageData.data[position] < 100;
-      document.body.style.cursor = isHovered ? "pointer" : "auto";
     }
+    document.body.style.cursor = isHovered ? "pointer" : "auto";
 
     if (this.clicked && isHovered) {
       this.zoomIn(markerIntersection);

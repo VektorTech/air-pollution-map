@@ -16,34 +16,37 @@
 	<main class="main">
 		<div class="container">
 			<header>
-				<div class="header-container">
-					<h1 class="heading">AQ Earth<sup style="font-size: 18px;">&reg;</sup></h1>
-				</div>
+				<h1 class="heading">AQ Earth<sup style="font-size: 18px;">&reg;</sup></h1>
 			</header>
-			<div class="panel">
+			<label class="toggle-btn">
+				<input id="toggle-panel" class="toggle-panel" checked type="checkbox" />
+				<svg style="margin:auto;" id="burger-menu" class="burger-menu" width="28" height="28">
+					<rect x="4" y="8" width="20" height="2" fill="white" class="burger-menu-bar" />
+					<rect x="4" y="14" width="20" height="2" fill="white" class="burger-menu-bar" />
+					<rect x="4" y="20" width="20" height="2" fill="white" class="burger-menu-bar" />
+				</svg>
+			</label>
+			<div class="panel open" id="panel">
 				<!-- <input placeholder="Search" type="text" class="search"> -->
-
 				<div class="details">
 					<time id="time-local"></time>
 					<div id="coordinates"></div>
 					<div id="location"></div>
 					<div id="quality"></div>
-				</div>
-
-				<div class="key">
-					<p class="key-title">Air Quality Index Scale</p>
-					<div class="key-scale"></div>
-					<ul class="key-names">
-						<li>Good</li>
-						<li>Fair</li>
-						<li>Moderate</li>
-						<li>Bad</li>
-						<li>Hazardous</li>
-					</ul>
+					<div id="charts"></div>
 				</div>
 			</div>
-
-			<div id="charts"></div>
+			<div class="key">
+				<p class="key-title">Air Quality Index Scale</p>
+				<div class="key-scale"></div>
+				<ul class="key-names">
+					<li>Good</li>
+					<li>Fair</li>
+					<li>Moderate</li>
+					<li>Bad</li>
+					<li>Hazardous</li>
+				</ul>
+			</div>
 		</div>
 	</main>
 

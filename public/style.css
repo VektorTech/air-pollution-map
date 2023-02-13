@@ -14,6 +14,7 @@
 @font-face {
   font-family: quick;
   src: url(/assets/fonts/Quick.ttf);
+  font-display: block;
 }
 
 html {
@@ -27,7 +28,7 @@ body {
   background-color: #080808;
   color: #fff;
   user-select: none;
-  font-size: clamp(1.1rem, 1.5vw, 1.5rem);
+  font-size: clamp(1.2rem, 1.5vw, 1.5rem);
 }
 
 #root {
@@ -48,9 +49,7 @@ body {
 }
 
 .container {
-  width: calc(100% - 5rem);
   height: 100%;
-  margin: 0 auto;
 }
 
 header {
@@ -61,20 +60,77 @@ header {
 .heading {
   font-family: quick;
   font-size: 3.4rem;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  column-gap: 0.5rem;
 }
 
-.header-container {
-  text-align: center;
-  height: 100%;
+.toggle-btn {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  display: flex;
+  position: absolute;
+  top: 0.5rem;
+  left: 1.5rem;
+  border: none;
+  background-color: #2f2f2f;
+  cursor: pointer;
+}
+
+.toggle-panel {
+  display: none;
+}
+
+.burger-menu-bar {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+input:checked + .burger-menu .burger-menu-bar:nth-child(1) {
+  transform: translateY(300%) rotateZ(45deg);
+}
+
+input:checked + .burger-menu .burger-menu-bar:nth-child(2) {
+  opacity: 0;
+}
+
+input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
+  transform: translateY(-300%) rotateZ(-45deg);
 }
 
 .panel {
-  display: inline-block;
+  transform: translateX(-100%);
   width: 100%;
-  max-width: 36rem;
-  height: calc(100% - 6rem);
-  padding-top: 4rem;
+  max-width: 28rem;
+  height: calc(100% - 22rem);
+  margin-top: 2rem;
   position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+  padding-left: 2rem;
+  transition: transform 0.3s;
+  background-color: #00000066;
+}
+
+.panel.open {
+  display: inline-block;
+  transform: translateX(0%);
+}
+
+.panel::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+.panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  background: rgb(110, 110, 110);
 }
 
 .search {
@@ -94,12 +150,16 @@ header {
 }
 
 .key {
+  position: fixed;
   display: grid;
   grid-template-columns: 1fr 4fr;
   grid-template-rows: 1fr 1fr;
-  position: absolute;
-  bottom: 3rem;
   column-gap: 0.5rem;
+  right: 0;
+  padding: 0 1.2rem;
+  bottom: 3rem;
+  width: 100%;
+  max-width: 44rem;
 }
 
 .key-title {
@@ -169,33 +229,17 @@ header {
 }
 
 #charts {
+  width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   position: relative;
-  height: 100vh;
-  width: 100vw;
-  max-width: 25rem;
-  height: calc(100% - 12rem);
-  float: right;
-  padding-right: 0.5rem;
+  margin-top: 3rem;
+  pointer-events: none;
 }
 
-#charts::-webkit-scrollbar {
-  width: 0.4rem;
-}
-
-#charts::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#charts::-webkit-scrollbar-thumb {
-  background: rgb(110, 110, 110);
-}
-
-@media screen and (max-width: 991px) {
-  #charts {
-    display: none;
-  }
+.flex {
+  display: flex;
+  column-gap: 1rem;
 }
 
 @media screen and (max-height: 420px) {

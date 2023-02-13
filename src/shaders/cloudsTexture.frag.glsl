@@ -20,5 +20,5 @@ void main() {
 	vec3 final = cloudColor.rgb * (diffuse + specular);
 	float y = min((final.r * 0.299) + (final.g * 0.587) + (final.b * 0.114), 0.65);
 
-	gl_FragColor = vec4(vec3(0.9), y);
+	gl_FragColor = vec4(vec3(0.8), y * 0.7);
 }

@@ -48,10 +48,10 @@ export default class Earth {
 
   constructor(scene: Scene) {
     const earthTexture = new TextureLoader().load(
-        "./assets/textures/earthDiffuse.jpg"
+        "./assets/textures/2k_earth_daymap.jpg"
       ),
       lightTexture = new TextureLoader().load(
-        "./assets/textures/earthLights.jpg"
+        "./assets/textures/2k_earth_nightmap.jpg?v=1"
       ),
       cloudsTexture = new TextureLoader().load(
         "./assets/textures/cloudsDiffuse.jpg"
@@ -60,7 +60,7 @@ export default class Earth {
     const geometry = new SphereGeometry(1, 150, 150);
     const cloudsGeometry = new SphereGeometry(1.006, 75, 75);
 
-    const lightPos = new Vector3(-1.5, 1.8, -3.2);
+    const lightPos = new Vector3(-0.8, 1.6, -1.5);
     const material = new ShaderMaterial({
       vertexShader: standardVertexShader,
       fragmentShader: lightTextureShader,
@@ -95,7 +95,7 @@ export default class Earth {
     this.pauseState = false;
     this.zoomState = false;
 
-    new TextureLoader().load("https://ksenia-k.com/img/threejs/earth-map.jpeg", (texture) => {
+    new TextureLoader().load("./assets/textures/earth-spec.jpeg", (texture) => {
       const image = texture.image;
       const canvas = document.createElement('canvas');
       canvas.width = image.width;

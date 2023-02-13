@@ -87,11 +87,6 @@ window.addEventListener("load", () => {
   const qualityDom = document.getElementById("quality");
   const timeDom = document.getElementById("time-local");
 
-  const charts = document.getElementById("charts") as HTMLDivElement;
-  panel.addEventListener("wheel", (e) => e.stopPropagation());
-  panel.addEventListener("touchstart", (e) => e.stopPropagation());
-  panel.addEventListener("touchmove", (e) => e.stopPropagation());
-
   document
     .getElementById("panel")
     .addEventListener("wheel", (e) => e.stopPropagation());
@@ -111,9 +106,8 @@ window.addEventListener("load", () => {
             lat < 0 ? "S" : "N"
           }, ${Math.abs(long).toFixed(2)}° ${_long < 0 ? "W" : "E"}`;
 
-          timeDom.innerHTML = `🕒 Last Updated &mdash; ${new Intl.DateTimeFormat(
+          timeDom.innerHTML = `<div class="flex"><span>🕒</span> <span>Last Updated &mdash; ${new Intl.DateTimeFormat(
             "default",
-
             {
               hour: "numeric",
               minute: "numeric",
@@ -123,7 +117,7 @@ window.addEventListener("load", () => {
               day: "numeric",
               timeZoneName: "short",
             }
-          ).format(new Date())} ${""}`;
+          ).format(new Date())} ${""}</span></div>`;
 
           locationDom.innerHTML = `<div class="flex"><span>📍</span> <span>${data.city.name}</span></div>`;
 
@@ -247,7 +241,7 @@ window.addEventListener("load", () => {
   ];
   getGlobalData().then((data: Array<any>) => {
     const [verts1, verts2] = data;
-    const globalStats = [...verts1, ...[]];
+    const globalStats = [...verts1, ...verts2];
 
     const statsGeometry = new BufferGeometry();
     let statsVertices = new Float32Array(globalStats.length * 6);
@@ -287,34 +281,18 @@ window.addEventListener("load", () => {
         colorVertices[i * 6] = color.r;
         colorVertices[i * 6 + 1] = color.g;
         colorVertices[i * 6 + 2] = color.b;
+
         colorVertices[i * 6 + 3] = color.r;
         colorVertices[i * 6 + 4] = color.g;
         colorVertices[i * 6 + 5] = color.b;
       } else {
-        colorVertices[i * 6] = 0.3;
+        colorVertices[i * 6] = 0.24;
         colorVertices[i * 6 + 1] = 0.2;
-        colorVertices[i * 6 + 2] = 0.25;
-        colorVertices[i * 6 + 3] = 0.3;
-        colorVertices[i * 6 + 4] = 0.2;
-        colorVertices[i * 6 + 5] = 0.25;
-      }
+        colorVertices[i * 6 + 2] = 0.2;
 
-      const _index = MathUtils.mapLinear(
-        +vert.a,
-        0,
-        300,
-        0,
-        gradient.length - 1
-      );
-      let _color = new Color();
-      if (+vert.a < 300) {
-        _color.lerpColors(
-          gradient[~~_index],
-          gradient[~~_index + 1],
-          _index % (~~_index || 1)
-        );
-      } else {
-        _color.setRGB(0.2, 0.2, 0.2);
+        colorVertices[i * 6 + 3] = 0.24;
+        colorVertices[i * 6 + 4] = 0.2;
+        colorVertices[i * 6 + 5] = 0.2;
       }
     });
 
@@ -325,7 +303,8 @@ window.addEventListener("load", () => {
     statsGeometry.setAttribute("color", new BufferAttribute(colorVertices, 3));
     const lineMaterial = new LineBasicMaterial({
       vertexColors: true,
-      linewidth: 2,
+      transparent: true,
+      opacity: 0.7,
     });
     const stats = new LineSegments(statsGeometry, lineMaterial);
     earth.earthMesh.add(stats);

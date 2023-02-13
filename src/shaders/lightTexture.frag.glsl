@@ -7,8 +7,8 @@ varying vec3 vNormal;
 varying vec3 vPosition;
 
 void main() {
-	vec3 lightColor = vec3(0.9412, 0.9216, 0.8745);
-	vec3 ambientColor = vec3(0.1451, 0.1451, 0.1451);
+	vec3 lightColor = vec3(0.7451, 0.7294, 0.6549);
+	vec3 ambientColor = vec3(0.0118, 0.098, 0.1686);
 
 	vec4 earthColor = texture2D(iEarthAlbedo, vUv);
 	vec4 nightLight = texture2D(iLightMap, vUv);
@@ -19,15 +19,13 @@ void main() {
 	vec3 reflectDirection = reflect(-lightDirection, vNormal);
 
 	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.0);
-	float specularity = pow(max(dot(viewDirection, reflectDirection), 0.0), 3.2);
-	float specular = min(0.07 * specularity, 0.8);
-	float attenuation = min(pow(length(lightDirection) * 0.4, 8.0) * 0.6 *
-		(1.0 - specularity), 0.55);
-	float fresnel = pow(0.75 - max(dot(vNormal, viewDirection), 0.0), 3.0);
+	float specularity = max(dot(viewDirection, reflectDirection), 0.0);
+	float attenuation = 1.0 - (diffuse + specularity * 0.12);
+	float fresnel = pow(0.8 - max(dot(vNormal, viewDirection), 0.0), 2.2);
 
 	vec3 finalColor =
 		earthColor.rgb *
-		((ambientColor + specular + fresnel + diffuse) * lightColor) +
+		((ambientColor + fresnel + diffuse) * lightColor) +
 		(nightLight.rgb * attenuation);
 
 	gl_FragColor = vec4(finalColor, 1.0);

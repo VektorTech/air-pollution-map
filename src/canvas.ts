@@ -171,6 +171,7 @@ export default class Canvas {
       delta
     );
     this.camera.updateProjectionMatrix();
+    this._wheelDeltaY *= 0.98;
 
     this.animationFrameCallbacks.forEach((timeInfo, callback) => {
       if (time - timeInfo.lastCalled >= timeInfo.interval) {

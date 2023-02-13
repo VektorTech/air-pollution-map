@@ -2,66 +2,24 @@ import { Chart, registerables } from "chart.js";
 import {
   MathUtils,
   BufferGeometry,
-  PointsMaterial,
   BufferAttribute,
-  Points,
   Color,
-  TextureLoader,
+  LineBasicMaterial,
+  LineSegments,
 } from "three";
-
-Chart.register(...registerables);
-
-const OPEN_WEATHER_API = "";
-const WAQI_API = "";
-const IQ_AIR_API = "";
-
-const daysAgo = Date.now() - 1000 * 60 * 60 * 24;
-
-const getIQAirData = (lat: number, long: number) =>
-  fetch(
-    `http://api.airvisual.com/v2/nearest_city?lat=${lat}&lon=${long}&key=${IQ_AIR_API}`
-  ).then((res) => res.json());
-
-const getAQData = (lat: number, long: number) =>
-  Promise.all([
-    fetch(
-      `http://api.openweathermap.org/data/2.5/air_pollution/history?lat=${lat}&lon=${long}&start=${Math.floor(
-        daysAgo / 1000
-      )}&end=${Math.floor(Date.now() / 1000)}&appid=${OPEN_WEATHER_API}`
-    ).then((res) => res.json()),
-    fetch(
-      `http://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${long}&limit=1&appid=${OPEN_WEATHER_API}`
-    ).then((res) => res.json()),
-  ]);
-
-const getAQIData = (lat: number, long: number) =>
-  fetch(
-    `https://api.waqi.info/feed/geo:${lat};${long}/?token=${WAQI_API}`
-  ).then((res) => res.json());
-
-const getGlobalData = async () => {
-  const file = await fetch(`https://waqi.info/rtdata/?_=${Date.now()}`).then(
-    (res) => res.json()
-  );
-  if (file.path) {
-    return [
-      await fetch(`https://waqi.info/rtdata/${file.path}/level1.json`).then(
-        (res) => res.json()
-      ),
-      (
-        await fetch(`https://waqi.info/rtdata/${file.path}/000.json`).then(
-          (res) => res.json()
-        )
-      ).stations,
-    ];
-  }
-  return [];
-};
+import {
+  getGlobalData,
+  getIQAirData,
+  getOpenWeatherMapData,
+  getWAQIData,
+} from "./api";
 
 import Canvas from "./canvas";
 import Earth from "./earth";
 import registerFastClickEvent from "./lib/fastClick";
 import Utils from "./utils";
+
+Chart.register(...registerables);
 
 const drawChart = (labels: string[], datasets: any[]) => {
   const charts = document.getElementById("charts") as HTMLDivElement;
@@ -81,6 +39,18 @@ const drawChart = (labels: string[], datasets: any[]) => {
           labels: {
             boxWidth: 0,
             boxHeight: 0,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+        },
+        y: {
+          grid: {
+            display: false,
           },
         },
       },
@@ -106,22 +76,34 @@ window.addEventListener("load", () => {
   const canvas = new Canvas("root");
   const earth = new Earth(canvas.canvasScene);
 
+  const panel = document.getElementById("panel");
+  const togglePanelBtn = document.getElementById("toggle-panel");
+  togglePanelBtn.addEventListener("click", (e) => {
+    panel.classList.toggle("open", (e.target as HTMLInputElement).checked);
+  });
+
   const coordDom = document.getElementById("coordinates");
   const locationDom = document.getElementById("location");
   const qualityDom = document.getElementById("quality");
   const timeDom = document.getElementById("time-local");
 
   const charts = document.getElementById("charts") as HTMLDivElement;
-  charts.addEventListener("wheel", (e) => e.stopPropagation());
+  panel.addEventListener("wheel", (e) => e.stopPropagation());
+  panel.addEventListener("touchstart", (e) => e.stopPropagation());
+  panel.addEventListener("touchmove", (e) => e.stopPropagation());
 
-  earth.onCoordinateSelected((lat, long) => {
+  document
+    .getElementById("panel")
+    .addEventListener("wheel", (e) => e.stopPropagation());
+
+  const printDataAtCoord = (lat: number, long: number) => {
     coordDom.innerHTML = "Please Wait...";
     qualityDom.innerHTML = "";
     locationDom.innerHTML = "";
 
     earth.pinMarker(lat, long, { name: "" });
 
-    getAQIData(lat, long)
+    getWAQIData(lat, long)
       .then(({ status, data }) => {
         if (status == "ok") {
           const [_lat, _long] = data.city.geo;
@@ -129,7 +111,21 @@ window.addEventListener("load", () => {
             lat < 0 ? "S" : "N"
           }, ${Math.abs(long).toFixed(2)}° ${_long < 0 ? "W" : "E"}`;
 
-          locationDom.innerHTML = `📍 ${data.city.name}`;
+          timeDom.innerHTML = `🕒 Last Updated &mdash; ${new Intl.DateTimeFormat(
+            "default",
+
+            {
+              hour: "numeric",
+              minute: "numeric",
+              second: "numeric",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              timeZoneName: "short",
+            }
+          ).format(new Date())} ${""}`;
+
+          locationDom.innerHTML = `<div class="flex"><span>📍</span> <span>${data.city.name}</span></div>`;
 
           const colorIndex =
             data.aqi < 300 ? Math.floor((data.aqi + 60) / 60) : 6;
@@ -139,17 +135,17 @@ window.addEventListener("load", () => {
         }
       })
       .then(() =>
-        getAQData(lat, long).then(async (res: any) => {
+        getOpenWeatherMapData(lat, long).then(async (res: any) => {
           const [aqRes, geoRes] = await Promise.all(res);
           try {
             const locationInfo = geoRes[0];
             if (locationInfo) {
               const { country, state, name } = locationInfo;
-              locationDom.innerHTML += `<br>📍 ${country ?? ""}, ${
-                state ?? ""
-              }, ${name ?? ""}`;
+              locationDom.innerHTML += `<div class="flex"><span>📍</span> <span>${
+                country ?? ""
+              }, ${state ?? ""}, ${name ?? ""}</span></div>`;
             } else {
-              locationDom.innerHTML += "<br>📍 Unknown";
+              locationDom.innerHTML += `<div class="flex"><span>📍</span> <span>Unknown</span></div>`;
             }
 
             const { list } = aqRes;
@@ -158,7 +154,7 @@ window.addEventListener("load", () => {
               new Date(item.dt * 1000).getHours()
             );
             const charts = document.getElementById("charts") as HTMLDivElement;
-            charts.innerHTML = "";
+            charts.innerHTML = "Pollutants (Open Weather Map)<br><br>";
 
             const allData = [
               {
@@ -212,9 +208,9 @@ window.addEventListener("load", () => {
         getIQAirData(lat, long).then((res) => {
           if (res.status == "success") {
             const { city, state, country, current } = res.data;
-            locationDom.innerHTML += `<br>📍 ${country ?? ""}, ${
-              state ?? ""
-            }, ${city ?? ""}`;
+            locationDom.innerHTML += `<div class="flex"><span>📍</span> <span>${
+              country ?? ""
+            }, ${state ?? ""}, ${city ?? ""}</span></div>`;
             const index = Math.floor((current.pollution.aqius + 100) / 100);
             const indexCN = Math.floor((current.pollution.aqicn + 100) / 100);
             qualityDom.innerHTML += `<br>📈 IQAir AQI &mdash; <span class="quality-${index}">US: ${current.pollution.aqius}</span>&nbsp;<span class="quality-${indexCN}">CN: ${current.pollution.aqicn}</span>`;
@@ -224,7 +220,9 @@ window.addEventListener("load", () => {
       .catch((err) => {
         coordDom.innerHTML = "Something Went Wrong!";
       });
-  });
+  };
+
+  earth.onCoordinateSelected(printDataAtCoord);
 
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(({ coords }) => {
@@ -234,6 +232,7 @@ window.addEventListener("load", () => {
         }, ${Math.abs(coords.longitude).toFixed(2)}°${
           coords.longitude < 0 ? "W" : "E"
         }`;
+        printDataAtCoord(coords.latitude, coords.longitude);
       }
     });
   }
@@ -246,19 +245,13 @@ window.addEventListener("load", () => {
     new Color("darkred"),
     new Color("brown"),
   ];
-  const discTexture = new TextureLoader().load("./assets/textures/disc.png");
   getGlobalData().then((data: Array<any>) => {
     const [verts1, verts2] = data;
     const globalStats = [...verts1, ...[]];
 
     const statsGeometry = new BufferGeometry();
-    const statsMaterial = new PointsMaterial({
-      size: 1.8e-2,
-      map: discTexture,
-      vertexColors: true,
-    });
-    let statsVertices = new Float32Array(globalStats.length * 3);
-    let colorVertices = new Float32Array(globalStats.length * 3);
+    let statsVertices = new Float32Array(globalStats.length * 6);
+    let colorVertices = new Float32Array(globalStats.length * 6);
 
     globalStats.map((vert: any, i: number) => {
       const { x, y, z } = Utils.sphericalToCartesian(
@@ -266,13 +259,19 @@ window.addEventListener("load", () => {
         -MathUtils.degToRad(vert.g[1]),
         earth.earthMesh.scale.x + 0.005
       );
-      statsVertices[i * 3] = x;
-      statsVertices[i * 3 + 1] = y;
-      statsVertices[i * 3 + 2] = z;
+      statsVertices[i * 6] = x;
+      statsVertices[i * 6 + 1] = y;
+      statsVertices[i * 6 + 2] = z;
+
+      const lineHeight =
+        +vert.a < 300 ? MathUtils.mapLinear(+vert.a, 0, 300, 1.02, 1.11) : 1.13;
+      statsVertices[i * 6 + 3] = x * lineHeight;
+      statsVertices[i * 6 + 4] = y * lineHeight;
+      statsVertices[i * 6 + 5] = z * lineHeight;
 
       if (+vert.a < 300) {
         const index = MathUtils.mapLinear(
-          vert.a,
+          +vert.a,
           0,
           300,
           0,
@@ -284,13 +283,38 @@ window.addEventListener("load", () => {
           gradient[~~index + 1],
           index % (~~index || 1)
         );
-        colorVertices[i * 3] = color.r;
-        colorVertices[i * 3 + 1] = color.g;
-        colorVertices[i * 3 + 2] = color.b;
+
+        colorVertices[i * 6] = color.r;
+        colorVertices[i * 6 + 1] = color.g;
+        colorVertices[i * 6 + 2] = color.b;
+        colorVertices[i * 6 + 3] = color.r;
+        colorVertices[i * 6 + 4] = color.g;
+        colorVertices[i * 6 + 5] = color.b;
       } else {
-        colorVertices[i * 3] = 0.2;
-        colorVertices[i * 3 + 1] = 0.2;
-        colorVertices[i * 3 + 2] = 0.2;
+        colorVertices[i * 6] = 0.3;
+        colorVertices[i * 6 + 1] = 0.2;
+        colorVertices[i * 6 + 2] = 0.25;
+        colorVertices[i * 6 + 3] = 0.3;
+        colorVertices[i * 6 + 4] = 0.2;
+        colorVertices[i * 6 + 5] = 0.25;
+      }
+
+      const _index = MathUtils.mapLinear(
+        +vert.a,
+        0,
+        300,
+        0,
+        gradient.length - 1
+      );
+      let _color = new Color();
+      if (+vert.a < 300) {
+        _color.lerpColors(
+          gradient[~~_index],
+          gradient[~~_index + 1],
+          _index % (~~_index || 1)
+        );
+      } else {
+        _color.setRGB(0.2, 0.2, 0.2);
       }
     });
 
@@ -299,7 +323,11 @@ window.addEventListener("load", () => {
       new BufferAttribute(statsVertices, 3)
     );
     statsGeometry.setAttribute("color", new BufferAttribute(colorVertices, 3));
-    const stats = new Points(statsGeometry, statsMaterial);
+    const lineMaterial = new LineBasicMaterial({
+      vertexColors: true,
+      linewidth: 2,
+    });
+    const stats = new LineSegments(statsGeometry, lineMaterial);
     earth.earthMesh.add(stats);
   });
 
@@ -309,26 +337,6 @@ window.addEventListener("load", () => {
     earth.update(delta);
     earth.checkActiveObjects(canvas.hoveredObjects);
   });
-
-  let options: Intl.DateTimeFormatOptions = {
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZoneName: "short",
-  };
-  timeDom.innerHTML = `🕒 ${new Intl.DateTimeFormat("default", options).format(
-    new Date()
-  )} ${""}`;
-
-  canvas.addAnimationFrameObserver((time, delta) => {
-    timeDom.innerHTML = `🕒 ${new Intl.DateTimeFormat(
-      "default",
-      options
-    ).format(new Date())} ${""}`;
-  }, 60 * 1000);
 
   canvas.addMoveInteractionObserver(() => {
     earth.onMoveInteraction(canvas.cursor, canvas.cursorMovement);

@@ -5,10 +5,11 @@ import {
   LineSegments,
   MathUtils,
   Color,
+  LoadingManager,
 } from "three";
 import {
-  getOpenWeatherMapData,
   getGlobalData,
+  getOpenWeatherMapData,
   getIQAirData,
   getWAQIData,
 } from "./api";
@@ -31,10 +32,46 @@ import {
 import registerFastClickEvent from "./lib/fastClick";
 import Utils from "./utils";
 
+window.loadingManager = new LoadingManager();
+
 window.addEventListener("load", () => {
   const canvas = new Canvas("root");
   const earth = new Earth(canvas.canvasScene);
 
+  const loader = document.getElementById("loader");
+
+  window.loadingManager.onStart = () => {
+    loader.innerHTML = "Initializing...";
+  };
+  window.loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    loader.innerHTML = `<span>Loading Textures: ${Math.round(
+      (itemsLoaded / itemsTotal) * 100
+    )}%</span>`;
+  };
+  window.loadingManager.onLoad = async () => {
+    try {
+      loader.innerHTML = `<span>Retrieving Global Indices...</span>`;
+      const globalAQI = await getGlobalData();
+      plotGlobalAQI(globalAQI, earth);
+      loader.innerHTML = `<span>Completed</span>`;
+      setTimeout(() => {
+        loader.classList.add("hidden");
+        loader.addEventListener("transitionend", () => {
+          document.body.removeChild(loader);
+        });
+      }, 1000);
+    } catch (err) {
+      loader.innerHTML = `<span>Error Loading Texture!</span>`;
+    }
+  };
+  window.loadingManager.onError = () => {
+    loader.innerHTML = `<span>Error Loading Texture!</span>`;
+  };
+
+  init(canvas, earth);
+});
+
+const init = (canvas: Canvas, earth: Earth) => {
   setupPanel();
 
   earth.onCoordinateSelected((lat, long) => {
@@ -49,84 +86,6 @@ window.addEventListener("load", () => {
     });
   }
 
-  getGlobalData().then((data: Array<any>) => {
-    const gradient = [
-      new Color("green"),
-      new Color("yellow"),
-      new Color("orange"),
-      new Color("red"),
-      new Color("darkred"),
-      new Color("brown"),
-    ];
-    const [verts1, verts2] = data;
-    const globalStats = [...verts1, ...verts2];
-    const statsGeometry = new BufferGeometry();
-    let statsVertices = new Float32Array(globalStats.length * 6);
-    let colorVertices = new Float32Array(globalStats.length * 6);
-
-    globalStats.map((vert: any, i: number) => {
-      const { x, y, z } = Utils.sphericalToCartesian(
-        MathUtils.degToRad(vert.g[0]),
-        -MathUtils.degToRad(vert.g[1]),
-        earth.earthMesh.scale.x + 0.005
-      );
-      statsVertices[i * 6] = x;
-      statsVertices[i * 6 + 1] = y;
-      statsVertices[i * 6 + 2] = z;
-
-      const lineHeight =
-        +vert.a < 300 ? MathUtils.mapLinear(+vert.a, 0, 300, 1.02, 1.11) : 1.13;
-      statsVertices[i * 6 + 3] = x * lineHeight;
-      statsVertices[i * 6 + 4] = y * lineHeight;
-      statsVertices[i * 6 + 5] = z * lineHeight;
-
-      if (+vert.a < 300) {
-        const index = MathUtils.mapLinear(
-          +vert.a,
-          0,
-          300,
-          0,
-          gradient.length - 1
-        );
-
-        const color = new Color().lerpColors(
-          gradient[~~index],
-          gradient[~~index + 1],
-          index % (~~index || 1)
-        );
-
-        colorVertices[i * 6] = color.r;
-        colorVertices[i * 6 + 1] = color.g;
-        colorVertices[i * 6 + 2] = color.b;
-
-        colorVertices[i * 6 + 3] = color.r;
-        colorVertices[i * 6 + 4] = color.g;
-        colorVertices[i * 6 + 5] = color.b;
-      } else {
-        colorVertices[i * 6] = 0.24;
-        colorVertices[i * 6 + 1] = 0.2;
-        colorVertices[i * 6 + 2] = 0.2;
-
-        colorVertices[i * 6 + 3] = 0.24;
-        colorVertices[i * 6 + 4] = 0.2;
-        colorVertices[i * 6 + 5] = 0.2;
-      }
-    });
-
-    statsGeometry.setAttribute(
-      "position",
-      new BufferAttribute(statsVertices, 3)
-    );
-    statsGeometry.setAttribute("color", new BufferAttribute(colorVertices, 3));
-    const lineMaterial = new LineBasicMaterial({
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.5,
-    });
-    const stats = new LineSegments(statsGeometry, lineMaterial);
-    earth.earthMesh.add(stats);
-  });
-
   registerFastClickEvent();
 
   canvas.addAnimationFrameObserver((time, delta) => {
@@ -137,7 +96,7 @@ window.addEventListener("load", () => {
   canvas.addMoveInteractionObserver(() => {
     earth.onMoveInteraction(canvas.cursor, canvas.cursorMovement);
   });
-});
+};
 
 const printDataAtCoord = (lat: number, long: number) => {
   clearAll();
@@ -189,3 +148,84 @@ const printDataAtCoord = (lat: number, long: number) => {
     })
     .catch(printError);
 };
+
+const plotGlobalAQI = (data: Array<any>, earth: Earth) => {
+  const gradient = [
+    new Color("green"),
+    new Color("yellow"),
+    new Color("orange"),
+    new Color("red"),
+    new Color("darkred"),
+    new Color("brown"),
+  ];
+  const [verts1, verts2] = data;
+  const globalStats = [...verts1, ...verts2];
+  const statsGeometry = new BufferGeometry();
+  let statsVertices = new Float32Array(globalStats.length * 6);
+  let colorVertices = new Float32Array(globalStats.length * 6);
+
+  globalStats.map((vert: any, i: number) => {
+    const { x, y, z } = Utils.sphericalToCartesian(
+      MathUtils.degToRad(vert.g[0]),
+      -MathUtils.degToRad(vert.g[1]),
+      earth.earthMesh.scale.x + 0.005
+    );
+    statsVertices[i * 6] = x;
+    statsVertices[i * 6 + 1] = y;
+    statsVertices[i * 6 + 2] = z;
+
+    const lineHeight =
+      +vert.a < 300 ? MathUtils.mapLinear(+vert.a, 0, 300, 1.02, 1.11) : 1.13;
+    statsVertices[i * 6 + 3] = x * lineHeight;
+    statsVertices[i * 6 + 4] = y * lineHeight;
+    statsVertices[i * 6 + 5] = z * lineHeight;
+
+    if (+vert.a < 300) {
+      const index = MathUtils.mapLinear(
+        +vert.a,
+        0,
+        300,
+        0,
+        gradient.length - 1
+      );
+
+      const color = new Color().lerpColors(
+        gradient[~~index],
+        gradient[~~index + 1],
+        index % (~~index || 1)
+      );
+
+      colorVertices[i * 6] = color.r;
+      colorVertices[i * 6 + 1] = color.g;
+      colorVertices[i * 6 + 2] = color.b;
+
+      colorVertices[i * 6 + 3] = color.r;
+      colorVertices[i * 6 + 4] = color.g;
+      colorVertices[i * 6 + 5] = color.b;
+    } else {
+      colorVertices[i * 6] = 0.24;
+      colorVertices[i * 6 + 1] = 0.2;
+      colorVertices[i * 6 + 2] = 0.2;
+
+      colorVertices[i * 6 + 3] = 0.24;
+      colorVertices[i * 6 + 4] = 0.2;
+      colorVertices[i * 6 + 5] = 0.2;
+    }
+  });
+
+  statsGeometry.setAttribute("position", new BufferAttribute(statsVertices, 3));
+  statsGeometry.setAttribute("color", new BufferAttribute(colorVertices, 3));
+  const lineMaterial = new LineBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.5,
+  });
+  const stats = new LineSegments(statsGeometry, lineMaterial);
+  earth.earthMesh.add(stats);
+};
+
+declare global {
+  interface Window {
+    loadingManager: LoadingManager;
+  }
+}

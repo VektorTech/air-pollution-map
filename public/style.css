@@ -39,6 +39,25 @@ body {
   height: 100vh !important;
 }
 
+.loader {
+  position: fixed;
+  z-index: 100;
+  background-color: black;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  transition: opacity 1s;
+}
+
+.loader.hidden {
+  opacity: 0;
+}
+
 .main {
   position: fixed;
   z-index: 10;
@@ -139,8 +158,13 @@ input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
   border: none;
   outline: none;
   border-bottom: 0.1rem solid #666;
-  color: #666;
-  caret-color: #666;
+  color: #ddd;
+  caret-color: #ddd;
+  width: 100%;
+  margin-bottom: 2rem;
+  padding: 0.3rem 0;
+  font-size: inherit;
+  font-family: inherit;
 }
 
 .details {

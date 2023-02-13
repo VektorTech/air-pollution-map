@@ -1,6 +1,8 @@
 import { SpriteMaterial, Sprite, TextureLoader } from "three";
 
-const map = new TextureLoader().load("./assets/textures/target.png");
+const map = new TextureLoader(window.loadingManager).load(
+  "./assets/textures/target.png"
+);
 export default class Marker {
   private innerMaterial: SpriteMaterial;
   private sprite: Sprite;

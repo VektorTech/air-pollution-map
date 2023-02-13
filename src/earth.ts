@@ -48,13 +48,14 @@ export default class Earth {
   public readonly name = "Earth";
 
   constructor(scene: Scene) {
-    const earthTexture = new TextureLoader().load(
+    const textureLoader = new TextureLoader(window.loadingManager);
+    const earthTexture = textureLoader.load(
         "./assets/textures/2k_earth_daymap.jpg"
       ),
-      lightTexture = new TextureLoader().load(
+      lightTexture = textureLoader.load(
         "./assets/textures/2k_earth_nightmap.jpg?v=1"
       ),
-      cloudsTexture = new TextureLoader().load(
+      cloudsTexture = textureLoader.load(
         "./assets/textures/cloudsDiffuse.jpg"
       );
 
@@ -96,7 +97,7 @@ export default class Earth {
     this.pauseState = false;
     this.zoomState = false;
 
-    new TextureLoader().load("./assets/textures/earth-spec.jpeg", (texture) => {
+    textureLoader.load("./assets/textures/earth-spec.jpeg", (texture) => {
       const image = texture.image;
       const canvas = document.createElement('canvas');
       canvas.width = image.width;

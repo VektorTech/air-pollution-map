@@ -17,9 +17,6 @@ export const setupPanel = () => {
 
   panel.addEventListener("wheel", (e) => e.stopPropagation());
   panel.addEventListener("fastclick", (e) => e.stopPropagation());
-  panel.addEventListener("pointerdown", (e) => e.stopPropagation());
-  panel.addEventListener("pointerup", (e) => e.stopPropagation());
-  panel.addEventListener("pointermove", (e) => e.stopPropagation());
   panel.addEventListener("touchstart", (e) => e.stopPropagation());
   panel.addEventListener("touchend", (e) => e.stopPropagation());
   panel.addEventListener("touchmove", (e) => e.stopPropagation());
@@ -190,3 +187,9 @@ export const renderChart = (list: any) => {
     ])
   );
 };
+
+export const clearAll = () => {
+  clearMessage();
+  clearCurrentAQI();
+  clearCurrentLocation();
+}

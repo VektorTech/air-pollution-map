@@ -1,31 +1,32 @@
 import {
-  MathUtils,
-  BufferGeometry,
-  BufferAttribute,
-  Color,
   LineBasicMaterial,
+  BufferAttribute,
+  BufferGeometry,
   LineSegments,
+  MathUtils,
+  Color,
 } from "three";
 import {
+  getOpenWeatherMapData,
   getGlobalData,
   getIQAirData,
-  getOpenWeatherMapData,
   getWAQIData,
 } from "./api";
 
 import Canvas from "./canvas";
 import Earth from "./earth";
 import {
-  appendAQI,
-  appendIQAir,
+  printLastUpdated,
   appendLocation,
   clearMessage,
-  printCoords,
-  printError,
-  printLastUpdated,
-  renderChart,
   renderLoader,
+  printCoords,
+  appendIQAir,
+  renderChart,
+  printError,
   setupPanel,
+  appendAQI,
+  clearAll,
 } from "./ui";
 import registerFastClickEvent from "./lib/fastClick";
 import Utils from "./utils";
@@ -120,7 +121,7 @@ window.addEventListener("load", () => {
     const lineMaterial = new LineBasicMaterial({
       vertexColors: true,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.5,
     });
     const stats = new LineSegments(statsGeometry, lineMaterial);
     earth.earthMesh.add(stats);
@@ -139,6 +140,7 @@ window.addEventListener("load", () => {
 });
 
 const printDataAtCoord = (lat: number, long: number) => {
+  clearAll();
   printCoords(lat, long);
   printLastUpdated();
   renderLoader();

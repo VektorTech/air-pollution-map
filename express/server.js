@@ -18,7 +18,8 @@ router.use((req, res, next) => {
 });
 
 router.get("/aqi-data", async (req, res) => {
-  res.json(await getGlobalData());
+  // res.json(await getGlobalData());
+  res.json({});
 });
 
 router.get("/aqi-data/:source/geo::lat;:long", async (req, res) => {

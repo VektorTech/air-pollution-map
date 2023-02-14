@@ -175,7 +175,9 @@ const plotGlobalAQI = (data: Array<any>, earth: Earth) => {
     statsVertices[i * 6 + 2] = z;
 
     const lineHeight =
-      +vert.a < 300 ? MathUtils.mapLinear(+vert.a, 0, 300, 1.02, 1.11) : 1.13;
+      +vert.a < 300
+        ? MathUtils.mapLinear(+vert.a, 0, 300, 1.05, 1.2)
+        : MathUtils.mapLinear(+vert.a, 300, 1000, 1.2, 1.3);
     statsVertices[i * 6 + 3] = x * lineHeight;
     statsVertices[i * 6 + 4] = y * lineHeight;
     statsVertices[i * 6 + 5] = z * lineHeight;
@@ -203,13 +205,13 @@ const plotGlobalAQI = (data: Array<any>, earth: Earth) => {
       colorVertices[i * 6 + 4] = color.g;
       colorVertices[i * 6 + 5] = color.b;
     } else {
-      colorVertices[i * 6] = 0.24;
-      colorVertices[i * 6 + 1] = 0.2;
-      colorVertices[i * 6 + 2] = 0.2;
+      colorVertices[i * 6] = 0.25;
+      colorVertices[i * 6 + 1] = 0.05;
+      colorVertices[i * 6 + 2] = 0.05;
 
-      colorVertices[i * 6 + 3] = 0.24;
-      colorVertices[i * 6 + 4] = 0.2;
-      colorVertices[i * 6 + 5] = 0.2;
+      colorVertices[i * 6 + 3] = 0.25;
+      colorVertices[i * 6 + 4] = 0.05;
+      colorVertices[i * 6 + 5] = 0.05;
     }
   });
 
@@ -218,7 +220,7 @@ const plotGlobalAQI = (data: Array<any>, earth: Earth) => {
   const lineMaterial = new LineBasicMaterial({
     vertexColors: true,
     transparent: true,
-    opacity: 0.5,
+    opacity: 0.35,
   });
   const stats = new LineSegments(statsGeometry, lineMaterial);
   earth.earthMesh.add(stats);

@@ -30,6 +30,7 @@
     "express": "^4.18.2",
     "gsap": "^3.11.3",
     "node-fetch": "^3.3.0",
+    "serverless-http": "^3.1.1",
     "three": "^0.147.0"
   }
 }

@@ -18,12 +18,9 @@ router.use((req, res, next) => {
 });
 
 router.get("/aqi-data", async (req, res) => {
-  res.json({
-    test: `test ${"str literal"}`,
-    date: Date.now(),
-    val: await test(),
-    api: process.env.IQ_AIR_API
-  });
+  res.json(
+    await test2()
+  );
   // res.json(await getGlobalData());
 });
 
@@ -32,7 +29,7 @@ async function test() {
 }
 
 async function test2() {
-  return fetch("http://example.org");
+  return fetch("https://dummyjson.com/quotes").then(res => res.json());
 }
 
 router.get("/aqi-data/:source/geo::lat;:long", async (req, res) => {

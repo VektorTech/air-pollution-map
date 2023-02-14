@@ -1,14 +1,16 @@
 {
-  "name": "air-pollution-globe",
+  "name": "aq-earth",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack serve --open",
+    "start": "node server-local.js",
+    "dev": "webpack serve --open",
     "serve": "node express/server",
+    "build-express": "netlify-lambda build express",
     "build": "webpack"
   },
-  "keywords": [],
+  "keywords": ["typescript", "three js", "aqi", "express", "gsap", "webpack", "geo", "serverless"],
   "author": "Kenny Sutherland",
   "license": "MIT",
   "devDependencies": {
@@ -29,6 +31,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "gsap": "^3.11.3",
+    "netlify-lambda": "^2.0.15",
     "node-fetch": "^3.3.0",
     "serverless-http": "^3.1.1",
     "three": "^0.147.0"

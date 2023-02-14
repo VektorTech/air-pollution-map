@@ -1,21 +1,25 @@
+"use strict"
+
 require("dotenv").config();
 const express = require("express");
+const serverless = require('serverless-http');
 const fetchImport = import("node-fetch");
 
 const app = express();
+const router = express.Router();
 const port = 5500;
 
-app.use(express.static("public"));
-app.use((req, res, next) => {
+router.use(express.static("public"));
+router.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   next();
 });
 
-app.get("/aqi-data", async (req, res) => {
+router.get("/aqi-data", async (req, res) => {
   res.json(await getGlobalData());
 });
 
-app.get("/aqi-data/:source/geo::lat;:long", async (req, res) => {
+router.get("/aqi-data/:source/geo::lat;:long", async (req, res) => {
   const { source, lat, long } = req.params;
   let data = null;
 
@@ -47,9 +51,14 @@ app.get("/aqi-data/:source/geo::lat;:long", async (req, res) => {
   res.json(data);
 });
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Listening on port ${port}`);
+// });
+
+app.use('/.netlify/functions/server', router);
+
+module.exports = app;
+module.exports.handler = serverless(app);
 
 async function getGlobalData() {
   const fetch = (await fetchImport).default;

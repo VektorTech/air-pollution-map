@@ -1,4 +1,4 @@
-const API_ADDRESS = "http://localhost:5500";
+const API_ADDRESS = "/.netlify/functions/server";
 
 export const getGlobalData = async () =>
   fetch(`${API_ADDRESS}/aqi-data`).then((res) => res.json());

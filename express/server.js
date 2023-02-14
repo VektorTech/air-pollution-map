@@ -1,11 +1,10 @@
 "use strict"
 
 require("dotenv").config();
-require('isomorphic-fetch');
 
 const express = require("express");
 const serverless = require('serverless-http');
-// const fetch = require("node-fetch");
+const fetch = require("node-fetch");
 
 const app = express();
 const router = express.Router();

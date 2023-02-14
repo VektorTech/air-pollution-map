@@ -17,19 +17,8 @@ router.use((req, res, next) => {
 });
 
 router.get("/aqi-data", async (req, res) => {
-  res.json(
-    await test2()
-  );
-  // res.json(await getGlobalData());
+  res.json(await getGlobalData());
 });
-
-async function test() {
-  return 44;
-}
-
-async function test2() {
-  return fetch("https://dummyjson.com/quotes").then(res => res.json());
-}
 
 router.get("/aqi-data/:source/geo::lat;:long", async (req, res) => {
   const { source, lat, long } = req.params;

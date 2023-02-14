@@ -17,8 +17,8 @@ void main() {
 	float specularity = pow(max(dot(viewDirection, reflectDirection), 0.0), 3.2);
 	float specular = min(0.08 * specularity, 0.7);
 
-	vec3 final = cloudColor.rgb * (diffuse + specular);
-	float y = min((final.r * 0.299) + (final.g * 0.587) + (final.b * 0.114), 0.65);
+	vec3 final = cloudColor.rgb * max(diffuse + specular, 0.1);
+	float y = min((final.r * 0.299) + (final.g * 0.587) + (final.b * 0.114), 0.6);
 
-	gl_FragColor = vec4(vec3(0.8), y * 0.7);
+	gl_FragColor = vec4(vec3(0.6), y * 0.6);
 }

@@ -7,8 +7,8 @@ varying vec3 vNormal;
 varying vec3 vPosition;
 
 void main() {
-	vec3 lightColor = vec3(0.7451, 0.7294, 0.6549);
-	vec3 ambientColor = vec3(0.0118, 0.098, 0.1686);
+	vec3 lightColor = vec3(0.7686, 0.7451, 0.6431);
+	vec3 ambientColor = vec3(0.0078, 0.0902, 0.1608);
 
 	vec4 earthColor = texture2D(iEarthAlbedo, vUv);
 	vec4 nightLight = texture2D(iLightMap, vUv);
@@ -21,7 +21,7 @@ void main() {
 	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.0);
 	float specularity = max(dot(viewDirection, reflectDirection), 0.0);
 	float attenuation = 1.0 - (diffuse + specularity * 0.12);
-	float fresnel = pow(0.85 - max(dot(vNormal, viewDirection), 0.0), 2.5);
+	float fresnel = pow(0.9 - max(dot(vNormal, viewDirection), 0.0), 2.5);
 
 	vec3 finalColor =
 		earthColor.rgb *

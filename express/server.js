@@ -3,7 +3,7 @@
 require("dotenv").config();
 const express = require("express");
 const serverless = require('serverless-http');
-const fetchImport = import("node-fetch");
+const fetch = require("node-fetch");
 
 const app = express();
 const router = express.Router();
@@ -61,7 +61,6 @@ module.exports = app;
 module.exports.handler = serverless(app);
 
 async function getGlobalData() {
-  const fetch = (await fetchImport).default;
   const request = await fetch(`https://waqi.info/rtdata/?_=${Date.now()}`);
   const file = (await request.json());
 
@@ -81,8 +80,6 @@ async function getGlobalData() {
 }
 
 const getIQAirData = async (lat, long) => {
-  const fetch = (await fetchImport).default;
-
   return fetch(
     `http://api.airvisual.com/v2/nearest_city?lat=${lat}&lon=${long}&key=${process.env.IQ_AIR_API}`
   ).then((res) => res.json());
@@ -90,7 +87,6 @@ const getIQAirData = async (lat, long) => {
 
 const getOpenWeatherMapData = async (lat, long) => {
   const TIME_AGO = (Date.now() - 1000 * 60 * 60 * 24) / 1000;
-  const fetch = (await fetchImport).default;
 
   return Promise.all([
     fetch(
@@ -106,8 +102,6 @@ const getOpenWeatherMapData = async (lat, long) => {
 };
 
 const getWAQIData = async (lat, long) => {
-  const fetch = (await fetchImport).default;
-
   return fetch(
     `https://api.waqi.info/feed/geo:${lat};${long}/?token=${process.env.WAQI_API}`
   ).then((res) => res.json());

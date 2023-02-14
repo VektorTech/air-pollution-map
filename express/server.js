@@ -65,7 +65,7 @@ async function getGlobalData() {
   const request = await fetch(`https://waqi.info/rtdata/?_=${Date.now()}`);
   const file = (await request.json());
 
-  if (file?.path) {
+  if (file && file.path) {
     return [
       await fetch(`https://waqi.info/rtdata/${file.path}/level1.json`).then(
         (res) => res.json()

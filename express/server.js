@@ -1,9 +1,11 @@
 "use strict"
 
 require("dotenv").config();
+require('isomorphic-fetch');
+
 const express = require("express");
 const serverless = require('serverless-http');
-const fetch = require("node-fetch");
+// const fetch = require("node-fetch");
 
 const app = express();
 const router = express.Router();
@@ -79,13 +81,13 @@ async function getGlobalData() {
   return [];
 }
 
-const getIQAirData = async (lat, long) => {
+const getIQAirData = (lat, long) => {
   return fetch(
     `http://api.airvisual.com/v2/nearest_city?lat=${lat}&lon=${long}&key=${process.env.IQ_AIR_API}`
   ).then((res) => res.json());
 }
 
-const getOpenWeatherMapData = async (lat, long) => {
+const getOpenWeatherMapData = (lat, long) => {
   const TIME_AGO = (Date.now() - 1000 * 60 * 60 * 24) / 1000;
 
   return Promise.all([
@@ -101,7 +103,7 @@ const getOpenWeatherMapData = async (lat, long) => {
   ])
 };
 
-const getWAQIData = async (lat, long) => {
+const getWAQIData = (lat, long) => {
   return fetch(
     `https://api.waqi.info/feed/geo:${lat};${long}/?token=${process.env.WAQI_API}`
   ).then((res) => res.json());

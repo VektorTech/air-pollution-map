@@ -27,7 +27,7 @@ module.exports = {
   },
   devServer: {
     static: "./public",
-    port: 3000,
+    port: 5500,
     hot: true
   }
 };

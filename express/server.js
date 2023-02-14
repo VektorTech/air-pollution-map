@@ -4,7 +4,7 @@ require("dotenv").config();
 
 const express = require("express");
 const serverless = require('serverless-http');
-const fetch = require("node-fetch");
+const fetch = require("node-fetch").default;
 
 const app = express();
 const router = express.Router();

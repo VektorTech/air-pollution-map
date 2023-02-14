@@ -61,7 +61,7 @@ window.addEventListener("load", () => {
         });
       }, 1000);
     } catch (err) {
-      loader.innerHTML = `<span>Error Loading Texture!</span>`;
+      loader.innerHTML = `<span>Server Error!</span>`;
     }
   };
   window.loadingManager.onError = () => {

@@ -53,7 +53,7 @@ export default class Earth {
         "./assets/textures/2k_earth_daymap.jpg"
       ),
       lightTexture = textureLoader.load(
-        "./assets/textures/2k_earth_nightmap.jpg?v=1"
+        "./assets/textures/2k_earth_nightmap.jpg"
       ),
       cloudsTexture = textureLoader.load(
         "./assets/textures/cloudsDiffuse.jpg"

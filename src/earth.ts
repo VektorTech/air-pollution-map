@@ -186,7 +186,7 @@ export default class Earth {
         this.rotationVelocity.x
       );
 
-      this.rotationVelocity.y += (movement.x / 15) * Number(this.isPointerDown);
+      this.rotationVelocity.y += (movement.x / 6) * Number(this.isPointerDown);
     }
   }
 

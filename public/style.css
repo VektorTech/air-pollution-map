@@ -6,6 +6,8 @@
   box-sizing: border-box;
 }
 
+ul { list-style: none; }
+
 @font-face {
   font-family: creato-display;
   src: url(/assets/fonts/CreatoDisplay-Regular.otf);
@@ -72,8 +74,20 @@ body {
 }
 
 header {
+  z-index: 101;
   height: 6rem;
   line-height: 6rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(calc(50vh - 7rem));
+  transition: 0.6s transform;
+  pointer-events: none;
+}
+
+header.loaded {
+  transform: translateY(0);
 }
 
 .heading {
@@ -124,8 +138,8 @@ input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
   transform: translateX(-100%);
   width: 100%;
   max-width: 28rem;
-  height: calc(100% - 22rem);
-  margin-top: 2rem;
+  height: calc(100vh - 18rem);
+  margin-top: 8rem;
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
@@ -161,9 +175,8 @@ input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
   color: #ddd;
   caret-color: #ddd;
   width: 100%;
-  margin-bottom: 2rem;
-  padding: 0.3rem 0;
-  font-size: inherit;
+  padding: 0.4rem 0;
+  font-size: 16px;
   font-family: inherit;
 }
 
@@ -201,6 +214,24 @@ input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
   display: flex;
   gap: 1.5rem;
   flex-direction: column;
+  margin-top: 2rem;
+}
+
+.plug {
+  position: fixed;
+  white-space: nowrap;
+  right: 3rem;
+  bottom: 8rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid white;
+  background-color: white;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.plug:hover {
+  opacity: 1;
 }
 
 .key {
@@ -288,7 +319,6 @@ input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
   overflow-y: auto;
   position: relative;
   margin-top: 3rem;
-  pointer-events: none;
 }
 
 .flex {

@@ -16,7 +16,6 @@ export const setupPanel = () => {
   });
 
   panel.addEventListener("wheel", (e) => e.stopPropagation());
-  panel.addEventListener("fastclick", (e) => e.stopPropagation());
   panel.addEventListener("touchstart", (e) => e.stopPropagation());
   panel.addEventListener("touchend", (e) => e.stopPropagation());
   panel.addEventListener("touchmove", (e) => e.stopPropagation());

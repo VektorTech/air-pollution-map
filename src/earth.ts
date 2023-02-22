@@ -47,7 +47,7 @@ export default class Earth {
 
   public readonly name = "Earth";
 
-  constructor(scene: Scene) {
+  constructor(scene: Scene, canvasElement: HTMLCanvasElement) {
     const textureLoader = new TextureLoader(window.loadingManager);
     const earthTexture = textureLoader.load(
         "./assets/textures/2k_earth_daymap.jpg"
@@ -55,9 +55,7 @@ export default class Earth {
       lightTexture = textureLoader.load(
         "./assets/textures/2k_earth_nightmap.jpg"
       ),
-      cloudsTexture = textureLoader.load(
-        "./assets/textures/cloudsDiffuse.jpg"
-      );
+      cloudsTexture = textureLoader.load("./assets/textures/cloudsDiffuse.jpg");
 
     const geometry = new SphereGeometry(1, 150, 150);
     const cloudsGeometry = new SphereGeometry(1.006, 75, 75);
@@ -99,24 +97,36 @@ export default class Earth {
 
     textureLoader.load("./assets/textures/earth-spec.jpeg", (texture) => {
       const image = texture.image;
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = image.width;
       canvas.height = image.height;
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext("2d");
       context.drawImage(image, 0, 0);
       this.imageData = context.getImageData(0, 0, image.width, image.height);
     });
 
     scene.add(this.earth);
 
-    addEventListener("pointerdown", () => (this.isPointerDown = true));
-    addEventListener("touchstart", () => (this.isPointerDown = true));
+    canvasElement.addEventListener(
+      "pointerdown",
+      () => (this.isPointerDown = true)
+    );
+    canvasElement.addEventListener(
+      "touchstart",
+      () => (this.isPointerDown = true)
+    );
     addEventListener("pointerup", () => (this.isPointerDown = false));
     addEventListener("touchend", () => (this.isPointerDown = false));
-    addEventListener("fastclick", () => (this.clicked = true));
+    addEventListener("fastclick", (e: CustomEvent) => {
+      if (e.detail.target == canvasElement) {
+        this.clicked = true;
+      }
+    });
   }
 
-  get earthMesh() { return this.earth; }
+  get earthMesh() {
+    return this.earth;
+  }
 
   pinMarker(
     latitude: number,
@@ -239,7 +249,9 @@ export default class Earth {
     let isHovered = false;
     if (this.pauseState && this.imageData) {
       const _x = Math.floor(earthIntersection.uv.x * this.imageData.width);
-      const _y = Math.floor((1 - earthIntersection.uv.y) * this.imageData.height);
+      const _y = Math.floor(
+        (1 - earthIntersection.uv.y) * this.imageData.height
+      );
       const position = (_x + this.imageData.width * _y) * 4;
       isHovered = this.imageData.data[position] < 100;
     }

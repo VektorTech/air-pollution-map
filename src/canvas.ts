@@ -91,7 +91,7 @@ export default class Canvas {
       this._wheelDeltaY = 0;
 
       addEventListener("resize", () => this.resize());
-      addEventListener("pointermove", ({ clientX, clientY }) => {
+      this.canvas.addEventListener("pointermove", ({ clientX, clientY }) => {
         if (!this._pointerPosition) {
           const { x, y } = this.normalizeCoords(clientX, clientY);
           this._pointerPosition = new Vector2(x, y);
@@ -99,7 +99,7 @@ export default class Canvas {
         this.castRay(clientX, clientY);
         this.onPointerMove(clientX, clientY);
       });
-      addEventListener("touchmove", ({ touches }) => {
+      this.canvas.addEventListener("touchmove", ({ touches }) => {
         if (!this._pointerPosition) {
           const { x, y } = this.normalizeCoords(
             touches[0].clientX,
@@ -109,13 +109,13 @@ export default class Canvas {
         }
         this.onPointerMove(touches[0].clientX, touches[0].clientY);
       });
-      addEventListener("click", ({ clientX, clientY }) =>
+      this.canvas.addEventListener("click", ({ clientX, clientY }) =>
         this.castRay(clientX, clientY)
       );
-      addEventListener("touchend", (e) => {
+      this.canvas.addEventListener("touchend", (e) => {
         this._pointerPosition = null;
       });
-      addEventListener("wheel", (e) => {
+      this.canvas.addEventListener("wheel", (e) => {
         this._wheelDeltaY = e.deltaY;
       });
       addEventListener("contextmenu", (event) => event.preventDefault());
@@ -139,6 +139,10 @@ export default class Canvas {
 
   get canvasScene() {
     return this.scene;
+  }
+
+  get canvasElement() {
+    return this.canvas;
   }
 
   private normalizeCoords(x: number, y: number) {

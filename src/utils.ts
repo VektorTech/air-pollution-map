@@ -22,4 +22,14 @@ const Utils = Object.freeze({
   },
 });
 
+export function debounce(cb: Function, timeout = 300) {
+  let timer: NodeJS.Timeout;
+  return (...args: unknown[]) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      cb.apply(this, args);
+    }, timeout);
+  };
+}
+
 export default Utils;

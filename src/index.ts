@@ -37,7 +37,7 @@ window.loadingManager = new LoadingManager();
 
 window.addEventListener("load", () => {
   const canvas = new Canvas("root");
-  const earth = new Earth(canvas.canvasScene);
+  const earth = new Earth(canvas.canvasScene, canvas.canvasElement);
 
   const loader = document.getElementById("loader");
 
@@ -57,6 +57,7 @@ window.addEventListener("load", () => {
       loader.innerHTML = `<span>Completed</span>`;
       setTimeout(() => {
         loader.classList.add("hidden");
+        document.getElementById("header").classList.add("loaded");
         loader.addEventListener("transitionend", () => {
           document.body.removeChild(loader);
         });
@@ -201,7 +202,9 @@ const plotGlobalAQI = (data: Array<any>, earth: Earth) => {
   let statsVertices = new Float32Array(globalStats.length * 6);
   let colorVertices = new Float32Array(globalStats.length * 6);
 
-  globalStats.map((vert: any, i: number) => {
+  globalStats.forEach((vert: any, i: number) => {
+    if (Number.isNaN(+vert.a)) return;
+
     const { x, y, z } = Utils.sphericalToCartesian(
       MathUtils.degToRad(vert.g[0]),
       -MathUtils.degToRad(vert.g[1]),
@@ -215,6 +218,7 @@ const plotGlobalAQI = (data: Array<any>, earth: Earth) => {
       +vert.a < 300
         ? MathUtils.mapLinear(+vert.a, 0, 300, 1.05, 1.2)
         : MathUtils.mapLinear(+vert.a, 300, 1000, 1.2, 1.3);
+
     statsVertices[i * 6 + 3] = x * lineHeight;
     statsVertices[i * 6 + 4] = y * lineHeight;
     statsVertices[i * 6 + 5] = z * lineHeight;

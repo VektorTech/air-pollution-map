@@ -18,3 +18,8 @@ export const getWAQIData = async (lat: number, long: number) =>
   fetch(`${API_ADDRESS}/aqi-data/waqi/geo:${lat};${long}`).then((res) =>
     res.json()
   );
+
+export const getAutosuggestions = async (text: string) =>
+  fetch(`${API_ADDRESS}/locations/${text}`).then((res) =>
+    res.json()
+  );

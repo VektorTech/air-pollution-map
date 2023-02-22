@@ -12,6 +12,7 @@ import {
   getOpenWeatherMapData,
   getIQAirData,
   getWAQIData,
+  getAutosuggestions,
 } from "./api";
 
 import Canvas from "./canvas";
@@ -30,7 +31,7 @@ import {
   clearAll,
 } from "./ui";
 import registerFastClickEvent from "./lib/fastClick";
-import Utils from "./utils";
+import Utils, { debounce } from "./utils";
 
 window.loadingManager = new LoadingManager();
 
@@ -96,6 +97,42 @@ const init = (canvas: Canvas, earth: Earth) => {
   canvas.addMoveInteractionObserver(() => {
     earth.onMoveInteraction(canvas.cursor, canvas.cursorMovement);
   });
+
+  const search = <HTMLInputElement>document.getElementById("search");
+  search.addEventListener(
+    "input",
+    debounce(async (event: InputEvent) => {
+      const suggestions = await getAutosuggestions(
+        (event.target as HTMLInputElement).value
+      ).catch(console.log);
+      const suggestionsDiv = document.getElementById("location-suggestions");
+      const ul = document.createElement("ul");
+
+      if (suggestions && suggestions.results) {
+        suggestions.results.forEach((suggestion: any) => {
+          const li = document.createElement("li");
+          li.innerHTML = `📍 <strong style="color:black;">${suggestion.address_line1}</strong> ${suggestion.address_line2}`;
+          li.addEventListener("click", function (e) {
+            earth.pinMarker(suggestion.lat, suggestion.lon, {
+              name: suggestion.name,
+            });
+            printDataAtCoord(suggestion.lat, suggestion.lon);
+            suggestionsDiv.innerHTML = "";
+            search.value = suggestion.formatted;
+          });
+          li.title = suggestion.formatted;
+          li.role = "button";
+          ul.appendChild(li);
+        });
+      }
+      if (ul.children.length) {
+        const geoapify = document.createElement("li");
+        geoapify.innerHTML = "Powered by Geoapify";
+        ul.appendChild(geoapify);
+      }
+      suggestionsDiv.replaceChildren(ul);
+    }, 300)
+  );
 };
 
 const printDataAtCoord = (lat: number, long: number) => {

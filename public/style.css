@@ -167,6 +167,36 @@ input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
   font-family: inherit;
 }
 
+#location-suggestions {
+  margin-top: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+  background-color: #fff;
+  max-width: 100%;
+  width: 90%;
+  position: absolute;
+}
+
+#location-suggestions li {
+  padding: 0.5rem 1rem;
+  color: #444;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#location-suggestions li:hover:not(:last-child) {
+  padding: 0.5rem 1rem;
+  background-color: #eee;
+}
+
+#location-suggestions li:last-child {
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+}
+
 .details {
   display: flex;
   gap: 1.5rem;

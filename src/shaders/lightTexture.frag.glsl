@@ -20,7 +20,7 @@ void main() {
 
 	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.0);
 	float specularity = max(dot(viewDirection, reflectDirection), 0.0);
-	float attenuation = 1.0 - (diffuse + specularity * 0.12);
+	float attenuation = 0.9 - (diffuse + specularity * 0.12);
 	float fresnel = pow(0.9 - max(dot(vNormal, viewDirection), 0.0), 2.5);
 
 	vec3 finalColor =

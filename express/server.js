@@ -8,7 +8,6 @@ const fetch = require("node-fetch").default;
 
 const app = express();
 const router = express.Router();
-const port = 5500;
 
 router.use(express.static("public"));
 router.use((req, res, next) => {
@@ -52,9 +51,20 @@ router.get("/aqi-data/:source/geo::lat;:long", async (req, res) => {
   res.json(data);
 });
 
-// app.listen(port, () => {
-//   console.log(`Listening on port ${port}`);
-// });
+router.get("/locations/:text", async (req, res) => {
+  try {
+    const { text } = req.params;
+
+    const data = await fetch(
+      `https://api.geoapify.com/v1/geocode/autocomplete?text=${text}&format=json&apiKey=${process.env.GEOAPIFY}`,
+      { method: 'GET' }
+    )
+      .then(response => response.json())
+    res.json(data);
+  } catch (err) {
+    res.json({});
+  }
+});
 
 app.use('/.netlify/functions/server', router);
 

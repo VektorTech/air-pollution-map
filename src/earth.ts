@@ -8,6 +8,7 @@ import {
   Quaternion,
   MathUtils,
   FrontSide,
+  BackSide,
   Object3D,
   Vector2,
   Vector3,
@@ -22,6 +23,7 @@ import Utils from "./utils";
 import standardVertexShader from "./shaders/standard.vert.glsl";
 import lightTextureShader from "./shaders/lightTexture.frag.glsl";
 import cloudsTextureShader from "./shaders/cloudsTexture.frag.glsl";
+import atmosphereShader from "./shaders/atmosphere.frag.glsl";
 import Marker from "./marker";
 
 export default class Earth {
@@ -52,15 +54,14 @@ export default class Earth {
     const earthTexture = textureLoader.load(
         "./assets/textures/2k_earth_daymap.jpg"
       ),
-      lightTexture = textureLoader.load(
-        "./assets/textures/2k_earth_nightmap.jpg"
-      ),
+      lightTexture = textureLoader.load("./assets/textures/earth_nightmap.jpg"),
       cloudsTexture = textureLoader.load("./assets/textures/cloudsDiffuse.jpg");
 
-    const geometry = new SphereGeometry(1, 150, 150);
-    const cloudsGeometry = new SphereGeometry(1.006, 75, 75);
+    const geometry = new SphereGeometry(1, 80, 80);
+    const cloudsGeometry = new SphereGeometry(1.006, 60, 60);
+    const atmosphereGeometry = new SphereGeometry(1.2, 60, 60);
 
-    const lightPos = new Vector3(-0.8, 1.6, -1.5);
+    const lightPos = new Vector3(-1.5, 1.7, -1.3);
     const material = new ShaderMaterial({
       vertexShader: standardVertexShader,
       fragmentShader: lightTextureShader,
@@ -80,12 +81,21 @@ export default class Earth {
       side: FrontSide,
       transparent: true,
     });
+    const atmosphereMaterial = new ShaderMaterial({
+      vertexShader: standardVertexShader,
+      fragmentShader: atmosphereShader,
+      uniforms: {
+        iLightPos: { value: lightPos },
+      },
+      side: BackSide
+    });
 
     this.earth = new Mesh(geometry, material);
     this.earth.name = this.name;
     this.clouds = new Mesh(cloudsGeometry, cloudsMaterial);
     this.clouds.raycast = () => undefined;
     this.earth.add(this.clouds);
+    this.earth.add(new Mesh(atmosphereGeometry, atmosphereMaterial));
 
     this.marker = new Marker();
 
@@ -182,8 +192,7 @@ export default class Earth {
       this.earth.rotation.y += this.rotationVelocity.y;
     }
 
-    this.clouds.rotation.y += Math.PI * delta * 2e-2;
-    this.clouds.rotation.z += -Math.PI * delta * 1e-3;
+    this.clouds.rotation.y += Math.PI * delta * 1e-2;
   }
 
   onMoveInteraction(position: Vector2, movement: Vector2) {

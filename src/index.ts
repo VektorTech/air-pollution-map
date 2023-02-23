@@ -261,7 +261,7 @@ const plotGlobalAQI = (data: Array<any>, earth: Earth) => {
   const lineMaterial = new LineBasicMaterial({
     vertexColors: true,
     transparent: true,
-    opacity: 0.35,
+    opacity: 0.15,
   });
   const stats = new LineSegments(statsGeometry, lineMaterial);
   earth.earthMesh.add(stats);

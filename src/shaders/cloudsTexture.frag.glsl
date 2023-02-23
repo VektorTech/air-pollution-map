@@ -10,15 +10,11 @@ void main() {
 
 	vec3 lightDirection = iLightPos - vPosition;
 	vec3 lightDirectionNormalized = normalize(iLightPos - vPosition);
-	vec3 viewDirection = normalize(cameraPosition - vPosition);
-	vec3 reflectDirection = reflect(-lightDirection, vNormal);
 
-	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.02);
-	float specularity = pow(max(dot(viewDirection, reflectDirection), 0.0), 3.2);
-	float specular = min(0.08 * specularity, 0.7);
+	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.0);
 
-	vec3 final = cloudColor.rgb * max(diffuse + specular, 0.1);
-	float y = min((final.r * 0.299) + (final.g * 0.587) + (final.b * 0.114), 0.6);
+	vec3 final = cloudColor.rgb * clamp(diffuse, 0.22, 0.7);
+	float y = (final.r * 0.299) + (final.g * 0.587) + (final.b * 0.114);
 
-	gl_FragColor = vec4(vec3(0.8), y * 0.5);
+	gl_FragColor = vec4(final, y);
 }

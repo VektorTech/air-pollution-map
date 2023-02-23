@@ -23,6 +23,7 @@ html {
   touch-action: manipulation;
   font-size: 62.5%;
   font-family: "creato-display";
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -47,8 +48,8 @@ body {
   background-color: black;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -137,7 +138,7 @@ input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
 .panel {
   transform: translateX(-100%);
   width: 100%;
-  max-width: 28rem;
+  max-width: 30rem;
   height: calc(100vh - 18rem);
   margin-top: 8rem;
   position: relative;
@@ -245,6 +246,7 @@ input:checked + .burger-menu .burger-menu-bar:nth-child(3) {
   bottom: 3rem;
   width: 100%;
   max-width: 44rem;
+  pointer-events: none;
 }
 
 .key-title {

@@ -8,7 +8,8 @@ varying vec3 vPosition;
 
 void main() {
 	vec3 lightColor = vec3(0.9882, 0.9765, 0.7098);
-	vec3 ambientColor = vec3(0.2667, 0.1882, 0.0196);
+	vec3 ambientColor = vec3(0.302, 0.2118, 0.0235);
+	vec3 atmosphere = vec3(0.9686, 0.9176, 0.6902);
 
 	vec4 earthColor = texture2D(iEarthAlbedo, vUv);
 	vec4 nightLight = texture2D(iLightMap, vUv);
@@ -21,13 +22,13 @@ void main() {
 	float specularity = max(dot(viewDirection, reflectDirection), 0.0) * 0.32;
 
 	float diffuse = max(dot(lightDirectionNormalized, vNormal), 0.0);
-	float fresnel = pow(1.0 - max(dot(vNormal, viewDirection), 0.05), 3.5);
+	float fresnel = pow(1.0 - max(dot(vNormal, viewDirection), 0.05), 3.5) * 0.5;
 
 	vec3 finalColor =
 		earthColor.rgb *
-		((ambientColor + fresnel + diffuse + specularity) * lightColor) +
+		((ambientColor + diffuse + specularity) * lightColor) +
 		nightLight.rgb *
-		(1.0 - min(diffuse + specularity, 1.0));
+		(1.0 - min(diffuse + specularity, 1.0)) + (fresnel * atmosphere);
 
 	gl_FragColor = vec4(finalColor, 1.0);
 }

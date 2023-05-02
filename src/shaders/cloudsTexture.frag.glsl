@@ -16,5 +16,5 @@ void main() {
 	vec3 final = cloudColor.rgb * clamp(diffuse, 0.22, 0.7);
 	float y = (final.r * 0.299) + (final.g * 0.587) + (final.b * 0.114);
 
-	gl_FragColor = vec4(final, y);
+	gl_FragColor = vec4(final, y * 0.5);
 }
